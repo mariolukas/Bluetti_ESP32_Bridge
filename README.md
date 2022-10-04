@@ -9,12 +9,12 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 
 You will need to install a board support package for your ESP32. Additionally the follwing libraries are needed: 
 
-	* https://github.com/tzapu/WiFiManager
-	* https://github.com/knolleary/pubsubclient
+* https://github.com/tzapu/WiFiManager
+* https://github.com/knolleary/pubsubclient
 
 Compile with partition scheme set to:
  	
-	* Huge App (3MB No OTA/1MB SPIFFS)
+* Huge App (3MB No OTA/1MB SPIFFS)
 
 This setting is required because the Bluetooth stack eats a lot of memory. 
 
@@ -25,9 +25,9 @@ Optional: Do changes in config.h file. The device can be set by changing 'BLUETT
 
 ## TODO
 
-	* adding addional Device_xxx.h files
-	* adding a web interface 
-	* adding logging poll commands
+* adding addional Device_xxx.h files
+* adding a web interface 
+* adding logging poll commands
 
 
 ## Disclaimer
