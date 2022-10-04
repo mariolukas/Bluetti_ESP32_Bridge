@@ -26,6 +26,7 @@ Optional: Do changes in config.h file. The device can be set by changing 'BLUETT
 ## TODO
 
 * adding addional Device_xxx.h files
+* add full feature set to device files
 * adding a web interface 
 * adding logging poll commands
 
