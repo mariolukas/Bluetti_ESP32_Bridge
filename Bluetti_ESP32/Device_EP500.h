@@ -1,5 +1,5 @@
-#ifndef DEVICE_AC300_H
-#define DEVICE_AC300_H
+#ifndef DEVICE_EP500_H
+#define DEVICE_EP500_H
 #include "Arduino.h"
 
 /* Not implemented yet
@@ -58,7 +58,7 @@ static device_field_data_t bluetti_device_state[] = {
 static device_field_data_t bluetti_device_command[] = {
   /*Page 0x00 Core */
   {AC_OUTPUT_ON,      0x0B, 0xBF, 1, 0, 0, BOOL_FIELD}, 
-  {DC_OUTPUT_ON,      0x0B, 0xC0, 1, 0, 0, BOOL_FIELD}
+  {DC_OUTPUT_ON,      0x0B, 0xC0, 1, 0, 0, BOOL_FIELD},
 };
 
 static device_field_data_t bluetti_polling_command[] = {

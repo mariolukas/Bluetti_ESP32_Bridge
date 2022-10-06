@@ -1,5 +1,5 @@
-#ifndef DEVICE_AC300_H
-#define DEVICE_AC300_H
+#ifndef DEVICE_AC200M_H
+#define DEVICE_AC200M_H
 #include "Arduino.h"
 
 /* Not implemented yet
@@ -46,19 +46,19 @@ static device_field_data_t bluetti_device_state[] = {
   {INTERNAL_AC_VOLTAGE,       0x00, 0x47, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_CURRENT_ONE,      0x00, 0x48, 1, 1, 0, DECIMAL_FIELD},
 
+
   //Page 0x00 Battery Details
   {PACK_NUM_MAX, 0x00, 0x5B, 1, 0, 0, UINT_FIELD },
 
   //Page 0x00 Battery Data 
   {PACK_VOLTAGE, 0x00, 0x62, 1, 2 ,0 ,DECIMAL_FIELD},
   */
-  
 };
 
 static device_field_data_t bluetti_device_command[] = {
   /*Page 0x00 Core */
+  {DC_OUTPUT_ON,      0x0B, 0xC0, 1, 0, 0, BOOL_FIELD},
   {AC_OUTPUT_ON,      0x0B, 0xBF, 1, 0, 0, BOOL_FIELD}, 
-  {DC_OUTPUT_ON,      0x0B, 0xC0, 1, 0, 0, BOOL_FIELD}
 };
 
 static device_field_data_t bluetti_polling_command[] = {
