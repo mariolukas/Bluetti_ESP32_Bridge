@@ -1,5 +1,5 @@
 #include "BluettiConfig.h"
-#include "Btooth.h"
+#include "BTooth.h"
 #include "utils.h"
 #include "PayloadParser.h"
 #include "BWifi.h"
