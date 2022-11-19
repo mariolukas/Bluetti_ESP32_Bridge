@@ -77,11 +77,11 @@ void initBWifi(bool resetWifi){
   wifiManager.autoConnect("Bluetti_ESP32");
 
   if (shouldSaveConfig) {
-     strcpy(wifiConfig.mqtt_server, custom_mqtt_server.getValue());
-     strcpy(wifiConfig.mqtt_port, custom_mqtt_port.getValue());
-     strcpy(wifiConfig.mqtt_username, custom_mqtt_username.getValue());
-     strcpy(wifiConfig.mqtt_password, custom_mqtt_password.getValue());
-     strcpy(wifiConfig.bluetti_device_id, custom_bluetti_device.getValue());
+     strlcpy(wifiConfig.mqtt_server, custom_mqtt_server.getValue(), 40);
+     strlcpy(wifiConfig.mqtt_port, custom_mqtt_port.getValue(), 6);
+     strlcpy(wifiConfig.mqtt_username, custom_mqtt_username.getValue(), 40);
+     strlcpy(wifiConfig.mqtt_password, custom_mqtt_password.getValue(), 40);
+     strlcpy(wifiConfig.bluetti_device_id, custom_bluetti_device.getValue(), 40);
      eeprom_saveconfig();
   }
 
