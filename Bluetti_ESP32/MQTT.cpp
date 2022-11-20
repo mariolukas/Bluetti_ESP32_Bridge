@@ -46,7 +46,7 @@ String map_field_name(enum field_names f_name){
         return "serial_number";
         break;
       case ARM_VERSION:
-        return "arm_vrsion";
+        return "arm_version";
         break;
       case DSP_VERSION:
         return "dsp_version";
