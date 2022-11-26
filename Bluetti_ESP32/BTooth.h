@@ -32,5 +32,6 @@ extern void handleBluetooth();
 bool connectToServer();
 extern void handleBTCommandQueue();
 extern void sendBTCommand(bt_command_t command);
+extern bool isBTconnected();
 
 #endif

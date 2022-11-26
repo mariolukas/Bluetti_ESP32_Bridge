@@ -149,3 +149,13 @@ void initMQTT(){
 void handleMQTT(){
     client.loop();
 }
+
+bool isMQTTconnected(){
+    if (client.connected()){
+      return true;
+    }
+    else
+    {
+      return false;
+    }  
+}

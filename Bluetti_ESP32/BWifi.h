@@ -11,6 +11,9 @@ typedef struct{
 } ESPBluettiSettings;
 
 extern ESPBluettiSettings get_esp32_bluetti_settings();
-extern void initBWifi();
+extern void initBWifi(bool resetWifi);
+extern void handleWebserver();
+void handleNotFound();
+void handleRoot();
 
 #endif

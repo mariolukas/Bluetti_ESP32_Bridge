@@ -6,5 +6,6 @@
 extern void publishTopic(enum field_names field_name, String value);
 extern void handleMQTT();
 extern void initMQTT();
+extern bool isMQTTconnected();
 
 #endif
