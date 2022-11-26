@@ -135,7 +135,8 @@ void handleRoot() {
   data = data + "<tr><td>mqqt connected:</td><td>" + isMQTTconnected() + "</td></tr>";
   data = data + "<tr><td>Bluetti device id:</td><td>" + wifiConfig.bluetti_device_id + "</td></tr>";
   data = data + "<tr><td>BT connected:</td><td>" + isBTconnected() + "</td></tr>";
-  
+  data = data + "<tr><td>BT publishing error:</td><td>" + getPublishErrorCount() + "</td></tr>";
+
   server.sendContent(data);
   server.sendContent("</table></BODY></HTML>");
   server.client().stop();
