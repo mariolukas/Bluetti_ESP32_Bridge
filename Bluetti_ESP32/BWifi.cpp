@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 #include <WiFiManager.h>
 #include <WebServer.h>
+#include <ESPmDNS.h>
 
 WebServer server(80);
 bool shouldSaveConfig = false;
@@ -88,11 +89,11 @@ void initBWifi(bool resetWifi){
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-/*
-  if (MDNS.begin("esp32")) {
+
+  if (MDNS.begin(DEVICE_NAME)) {
     Serial.println("MDNS responder started");
   }
-*/
+
     server.on("/", handleRoot);
     server.on("/rebootDevice", []() {
       server.send(200, "text/plain", "reboot in 2sec");
