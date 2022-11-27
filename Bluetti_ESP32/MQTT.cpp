@@ -140,6 +140,7 @@ void publishDeviceState(){
     publishErrorCount++;
   }
   lastMQTTMessage = millis();
+  previousDeviceStatePublish = millis();
  
 }
 
@@ -178,7 +179,6 @@ void handleMQTT(){
     
       
     if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
-      previousDeviceStatePublish = millis();
       publishDeviceState();
     }
     
