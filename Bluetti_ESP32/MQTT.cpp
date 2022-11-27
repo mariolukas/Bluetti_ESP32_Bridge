@@ -164,6 +164,8 @@ void initMQTT(){
           subscribeTopic(bluetti_device_command[i].f_name);
         }
     }
+
+    publishDeviceState();
       
 };
 
@@ -172,6 +174,7 @@ void handleMQTT(){
       Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
       ESP.restart();
     }
+    
     
       
     if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
