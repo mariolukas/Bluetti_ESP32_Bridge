@@ -244,3 +244,7 @@ void handleBluetooth(){
 bool isBTconnected(){
   return connected;
 }
+
+unsigned long getLastBTMessageTime(){
+    return lastBTMessage;
+}

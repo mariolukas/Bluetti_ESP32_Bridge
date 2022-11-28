@@ -134,16 +134,19 @@ void handleRoot() {
   data = data + "<tr><td>mqtt server:</td><td>" + wifiConfig.mqtt_server + "</td></tr>";
   data = data + "<tr><td>mqtt port:</td><td>" + wifiConfig.mqtt_port + "</td></tr>";
   data = data + "<tr><td>mqqt connected:</td><td>" + isMQTTconnected() + "</td></tr>";
+  data = data + "<tr><td>mqqt last message time:</td><td>" + getLastMQTTMessageTime() + "</td></tr>";
+  data = data + "<tr><td>mqqt last devicestate time:</td><td>" + getLastMQTDeviceStateMessageTime() + "</td></tr>";
   data = data + "<tr><td>Bluetti device id:</td><td>" + wifiConfig.bluetti_device_id + "</td></tr>";
   data = data + "<tr><td>BT connected:</td><td>" + isBTconnected() + "</td></tr>";
+  data = data + "<tr><td>BT last message time:</td><td>" + getLastBTMessageTime() + "</td></tr>";
   data = data + "<tr><td>BT publishing error:</td><td>" + getPublishErrorCount() + "</td></tr>";
 
   server.sendContent(data);
   server.sendContent("</table></BODY></HTML>");
   server.client().stop();
-  //server.send(200, "text/plain", "hello from esp32!");
 
 }
+
 
 void handleNotFound() {
   String message = "File Not Found\n\n";

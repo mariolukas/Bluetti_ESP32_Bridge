@@ -9,5 +9,7 @@ extern void handleMQTT();
 extern void initMQTT();
 extern bool isMQTTconnected();
 extern int getPublishErrorCount();
+unsigned long getLastMQTTMessageTime();
+unsigned long getLastMQTDeviceStateMessageTime();
 
 #endif

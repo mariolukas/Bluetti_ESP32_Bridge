@@ -33,5 +33,6 @@ bool connectToServer();
 extern void handleBTCommandQueue();
 extern void sendBTCommand(bt_command_t command);
 extern bool isBTconnected();
+extern unsigned long getLastBTMessageTime();
 
 #endif

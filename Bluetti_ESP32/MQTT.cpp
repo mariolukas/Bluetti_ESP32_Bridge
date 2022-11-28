@@ -175,11 +175,19 @@ void handleMQTT(){
       Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
       ESP.restart();
     }
-    
-    
       
     if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
       publishDeviceState();
+    }
+
+    if (!isMQTTconnected() && publishErrorCount > 50){
+      Serial.println(F("MQTT lost connection, try to reconnet"));
+      client.disconnect();
+      lastMQTTMessage=0;
+      previousDeviceStatePublish=0;
+      publishErrorCount=0;
+      initMQTT();
+
     }
     
     client.loop();
@@ -197,4 +205,10 @@ bool isMQTTconnected(){
 
 int getPublishErrorCount(){
     return publishErrorCount;
+}
+unsigned long getLastMQTTMessageTime(){
+    return lastMQTTMessage;
+}
+unsigned long getLastMQTDeviceStateMessageTime(){
+    return previousDeviceStatePublish;
 }
