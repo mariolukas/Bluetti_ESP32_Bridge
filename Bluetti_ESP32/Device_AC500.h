@@ -1,5 +1,5 @@
-#ifndef DEVICE_EP500P_H
-#define DEVICE_EP500P_H
+#ifndef DEVICE_AC500_H
+#define DEVICE_AC500_H
 #include "Arduino.h"
 
 /* Not implemented yet

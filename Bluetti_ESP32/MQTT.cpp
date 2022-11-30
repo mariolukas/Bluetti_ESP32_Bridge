@@ -9,6 +9,9 @@
 
 WiFiClient mqttClient;  
 PubSubClient client(mqttClient);
+int publishErrorCount = 0;
+unsigned long lastMQTTMessage = 0;
+unsigned long previousDeviceStatePublish = 0;
 
 String map_field_name(enum field_names f_name){
    switch(f_name) {
@@ -100,6 +103,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   
   command.len = swap_bytes(strPayload.toInt());
   command.check_sum = modbus_crc((uint8_t*)&command,6);
+  lastMQTTMessage = millis();
   
   sendBTCommand(command);
 }
@@ -110,6 +114,7 @@ void subscribeTopic(enum field_names field_name) {
 
   sprintf(subscribeTopicBuf, "bluetti/%s/command/%s", settings.bluetti_device_id, map_field_name(field_name).c_str() );
   client.subscribe(subscribeTopicBuf);
+  lastMQTTMessage = millis();
 
 }
 
@@ -118,8 +123,25 @@ void publishTopic(enum field_names field_name, String value){
 
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
   sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, map_field_name(field_name).c_str() ); 
-  client.publish(publishTopicBuf, value.c_str() );
+  if (!client.publish(publishTopicBuf, value.c_str() )){
+    publishErrorCount++;
+  }
+  lastMQTTMessage = millis();
+ 
+}
 
+void publishDeviceState(){
+  char publishTopicBuf[1024];
+
+  ESPBluettiSettings settings = get_esp32_bluetti_settings();
+  sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, "device" ); 
+  String value = "{\"IP\":\"" + WiFi.localIP().toString() + "\", \"MAC\":\"" + WiFi.macAddress() + "\", \"Uptime\":" + millis() + "}";
+  if (!client.publish(publishTopicBuf, value.c_str() )){
+    publishErrorCount++;
+  }
+  lastMQTTMessage = millis();
+  previousDeviceStatePublish = millis();
+ 
 }
 
 void initMQTT(){
@@ -143,9 +165,50 @@ void initMQTT(){
           subscribeTopic(bluetti_device_command[i].f_name);
         }
     }
+
+    publishDeviceState();
       
 };
 
 void handleMQTT(){
+    if ((millis() - lastMQTTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
+      Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
+      ESP.restart();
+    }
+      
+    if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
+      publishDeviceState();
+    }
+
+    if (!isMQTTconnected() && publishErrorCount > 50){
+      Serial.println(F("MQTT lost connection, try to reconnet"));
+      client.disconnect();
+      lastMQTTMessage=0;
+      previousDeviceStatePublish=0;
+      publishErrorCount=0;
+      initMQTT();
+
+    }
+    
     client.loop();
+}
+
+bool isMQTTconnected(){
+    if (client.connected()){
+      return true;
+    }
+    else
+    {
+      return false;
+    }  
+}
+
+int getPublishErrorCount(){
+    return publishErrorCount;
+}
+unsigned long getLastMQTTMessageTime(){
+    return lastMQTTMessage;
+}
+unsigned long getLastMQTDeviceStateMessageTime(){
+    return previousDeviceStatePublish;
 }
