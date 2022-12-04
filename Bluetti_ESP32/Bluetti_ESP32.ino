@@ -3,6 +3,9 @@
 #include "MQTT.h"
 #include "config.h"
 
+unsigned long lastTime1 = 0;
+unsigned long timerDelay1 = 3000;
+
 void setup() {
   Serial.begin(115200);
   #ifdef RELAISMODE
@@ -21,4 +24,8 @@ void loop() {
   handleBluetooth();
   handleMQTT(); 
   handleWebserver();
+  
+  
+  
+  
 }

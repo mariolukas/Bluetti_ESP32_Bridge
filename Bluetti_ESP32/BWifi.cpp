@@ -2,12 +2,20 @@
 #include "BWifi.h"
 #include "BTooth.h"
 #include "MQTT.h"
+#include "index.h"  //Web page header file
 #include <EEPROM.h>
 #include <WiFiManager.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h> // https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
+#include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 #include <ESPmDNS.h>
 
-WebServer server(80);
+AsyncWebServer server(80);
+AsyncEventSource events("/events");
+
+unsigned long lastTimeWebUpdate = 0;  
+
+String lastMsg = ""; 
+
 bool shouldSaveConfig = false;
 
 char mqtt_server[40] = "127.0.0.1";
@@ -94,71 +102,121 @@ void initBWifi(bool resetWifi){
     Serial.println("MDNS responder started");
   }
 
-    server.on("/", handleRoot);
-    server.on("/rebootDevice", []() {
-      server.send(200, "text/plain", "reboot in 2sec");
+  //setup web server handling
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send_P(200, "text/html", index_html, processorWebsiteUpdates);
+  });
+  server.on("/rebootDevice", [](AsyncWebServerRequest *request) {
+      request->send(200, "text/plain", "reboot in 2sec");
       delay(2000);
       ESP.restart();
-    });
-    server.on("/resetConfig", []() {
-      server.send(200, "text/plain", "reset Wifi and reboot in 2sec");
+  });
+  server.on("/resetConfig", [](AsyncWebServerRequest *request) {
+      request->send(200, "text/plain", "reset Wifi and reboot in 2sec");
       delay(2000);
       initBWifi(true);
   });
+  //setup web server events
+  events.onConnect([](AsyncEventSourceClient *client){
+    if(client->lastId()){
+      Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
+    }
+    client->send("hello my friend, I'm just your data feed!", NULL, millis(), 10000);
+  });
+  server.addHandler(&events);
   
-  
-
-  server.onNotFound(handleNotFound);
-
   server.begin();
   Serial.println("HTTP server started");
 
 }
 
 void handleWebserver() {
-  server.handleClient();
-}
+  if ((millis() - lastTimeWebUpdate) > MSG_VIEWER_REFRESH_CYCLE*1000) {
+    
+    Serial.println("Update Web events");
+    Serial.println();
+    // Send Events to the Web Server with the Sensor Readings
+    events.send("ping",NULL,millis());
+    events.send(String(millis()).c_str(),"runtime",millis());
+    events.send(String(WiFi.RSSI()).c_str(),"rssi",millis());
+    events.send(String(isMQTTconnected()).c_str(),"mqtt_connected",millis());
+    events.send(String(getLastMQTTMessageTime()).c_str(),"last_mqtt_msg_time",millis());
+    events.send(String(isBTconnected()).c_str(),"bt_connected",millis());
+    events.send(String(getLastBTMessageTime()).c_str(),"bt_last_msg_time",millis());
+    events.send(lastMsg.c_str(),"last_msg",millis());
 
-void handleRoot() {
-  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-  server.send(200, "text/html; charset=utf-8", "");
-  server.sendContent("<HTML><HEAD><TITLE>device status</TITLE></HEAD><BODY>");
-  server.sendContent("<table border='0'>");
-  String data = "<tr><td>host:</td><td>" + WiFi.localIP().toString() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/rebootDevice' target='_blank'>reboot this device</a></td></tr>";
-  data = data + "<tr><td>SSID:</td><td>" + WiFi.SSID() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/resetConfig' target='_blank'>reset device config</a></td></tr>";
-  data = data + "<tr><td>WiFiRSSI:</td><td>" + (String)WiFi.RSSI() + "</td></tr>";
-  data = data + "<tr><td>MAC:</td><td>" + WiFi.macAddress() + "</td></tr>";
-  data = data + "<tr><td>uptime (ms):</td><td>" + millis() + "</td></tr>";
-  data = data + "<tr><td>uptime (h):</td><td>" + millis() / 3600000 + "</td></tr>";
-  data = data + "<tr><td>uptime (d):</td><td>" + millis() / 3600000/24 + "</td></tr>";
-  data = data + "<tr><td>mqtt server:</td><td>" + wifiConfig.mqtt_server + "</td></tr>";
-  data = data + "<tr><td>mqtt port:</td><td>" + wifiConfig.mqtt_port + "</td></tr>";
-  data = data + "<tr><td>mqqt connected:</td><td>" + isMQTTconnected() + "</td></tr>";
-  data = data + "<tr><td>mqqt last message time:</td><td>" + getLastMQTTMessageTime() + "</td></tr>";
-  data = data + "<tr><td>mqqt last devicestate time:</td><td>" + getLastMQTDeviceStateMessageTime() + "</td></tr>";
-  data = data + "<tr><td>Bluetti device id:</td><td>" + wifiConfig.bluetti_device_id + "</td></tr>";
-  data = data + "<tr><td>BT connected:</td><td>" + isBTconnected() + "</td></tr>";
-  data = data + "<tr><td>BT last message time:</td><td>" + getLastBTMessageTime() + "</td></tr>";
-  data = data + "<tr><td>BT publishing error:</td><td>" + getPublishErrorCount() + "</td></tr>";
-
-  server.sendContent(data);
-  server.sendContent("</table></BODY></HTML>");
-  server.client().stop();
-
-}
-
-
-void handleNotFound() {
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+   
+    
+    lastTimeWebUpdate = millis();
   }
-  server.send(404, "text/plain", message);
+}
+
+String processorWebsiteUpdates(const String& var){
+  if(var == "IP"){
+    return String(WiFi.localIP().toString());
+  }
+  if(var == "RSSI"){
+    return String(WiFi.RSSI());
+  }
+  if(var == "SSID"){
+    return String(WiFi.SSID());
+  }
+  if(var == "MAC"){
+    return String(WiFi.macAddress());
+  }
+  if(var == "RUNTIME"){
+    return String(millis());
+  }
+  else if(var == "MQTT_IP"){
+    return String(wifiConfig.mqtt_server);
+  }
+  else if(var == "MQTT_PORT"){
+    return String(wifiConfig.mqtt_port);
+  }
+  else if(var == "MQTT_CONNECTED"){
+    return String(isMQTTconnected());
+  }
+  else if(var == "LAST_MQTT_MSG_TIME"){
+    return String(getLastMQTTMessageTime());
+  }
+  else if(var == "DEVICE_ID"){
+    return String(wifiConfig.bluetti_device_id);
+  }
+  else if(var == "BT_CONNECTED"){
+    return String(isBTconnected());
+  }
+  else if(var == "LAST_BT_MSG_TIME"){
+    return String(getLastBTMessageTime());
+  }
+  else if(var == "BT_ERROR"){
+    return String(getPublishErrorCount());
+  }
+  else if(var == "LAST_MSG"){
+    return String("...waiting for data...");
+  }
+}
+
+void AddtoMsgView(String data){
+  
+  String tempMsg = "";
+  
+  int firstPos = lastMsg.indexOf("</p>");
+  int nextPos = firstPos;
+  int numEntry = 0;
+  while(nextPos > 0){
+    nextPos = lastMsg.indexOf("</p>",nextPos+4);
+    if (nextPos > 0){
+      numEntry++;
+    }
+  }
+
+  if (numEntry > MSG_VIEWER_ENTRY_COUNT-2){
+    tempMsg = lastMsg.substring(firstPos+4);
+    lastMsg = tempMsg + "<p>" + data + "</p>";
+  }
+  else{
+    lastMsg = lastMsg + "<p>" + data + "</p>";
+  }
+
+  
 }
