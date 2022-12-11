@@ -24,8 +24,4 @@ void loop() {
   handleBluetooth();
   handleMQTT(); 
   handleWebserver();
-  
-  
-  
-  
 }

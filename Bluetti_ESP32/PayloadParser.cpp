@@ -1,6 +1,7 @@
 #include "BluettiConfig.h"
 #include "MQTT.h"
 #include "PayloadParser.h"
+#include "BWifi.h"
 
 
 uint16_t parse_uint_field(uint8_t data[]){
@@ -109,10 +110,18 @@ void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t le
                 }
                 
             }
+            else{
+              //AddtoMsgView("skip filtered field: "+ String(bluetti_device_state[i].f_name));
+            }
         }
         
-      break; 
-
+        break; 
+      case 0x06:
+        AddtoMsgView("skip 0x06 request! page: "+ String(page) + " offset: " + offset);
+        break;
+      default:
+        AddtoMsgView("skip unknow request! page: "+ String(page) + " offset: " + offset);
+        break;
     }
     
 }

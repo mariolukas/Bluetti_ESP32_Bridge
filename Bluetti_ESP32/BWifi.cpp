@@ -133,9 +133,8 @@ void initBWifi(bool resetWifi){
 void handleWebserver() {
   if ((millis() - lastTimeWebUpdate) > MSG_VIEWER_REFRESH_CYCLE*1000) {
     
-    Serial.println("Update Web events");
-    Serial.println();
-    // Send Events to the Web Server with the Sensor Readings
+    
+    // Send Events to the Web Server with current data
     events.send("ping",NULL,millis());
     events.send(String(millis()).c_str(),"runtime",millis());
     events.send(String(WiFi.RSSI()).c_str(),"rssi",millis());
