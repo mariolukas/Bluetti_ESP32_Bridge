@@ -53,6 +53,8 @@ void initBWifi(bool resetWifi){
 
   WiFiManagerParameter custom_mqtt_server("server", "MQTT Server Address", mqtt_server, 40);
   WiFiManagerParameter custom_mqtt_port("port", "MQTT Server Port", mqtt_port, 6);
+  WiFiManagerParameter custom_mqtt_username("username", "MQTT Username", "", 40);
+  WiFiManagerParameter custom_mqtt_password("password", "MQTT Password", "", 40, "type=password");
   WiFiManagerParameter custom_bluetti_device("bluetti", "Bluetti Bluetooth ID", bluetti_device_id, 40);
 
   WiFiManager wifiManager;
@@ -68,14 +70,18 @@ void initBWifi(bool resetWifi){
   
   wifiManager.addParameter(&custom_mqtt_server);
   wifiManager.addParameter(&custom_mqtt_port);
+  wifiManager.addParameter(&custom_mqtt_username);
+  wifiManager.addParameter(&custom_mqtt_password);
   wifiManager.addParameter(&custom_bluetti_device);
 
   wifiManager.autoConnect("Bluetti_ESP32");
 
   if (shouldSaveConfig) {
-     strcpy(wifiConfig.mqtt_server, custom_mqtt_server.getValue());
-     strcpy(wifiConfig.mqtt_port, custom_mqtt_port.getValue());
-     strcpy(wifiConfig.bluetti_device_id, custom_bluetti_device.getValue());
+     strlcpy(wifiConfig.mqtt_server, custom_mqtt_server.getValue(), 40);
+     strlcpy(wifiConfig.mqtt_port, custom_mqtt_port.getValue(), 6);
+     strlcpy(wifiConfig.mqtt_username, custom_mqtt_username.getValue(), 40);
+     strlcpy(wifiConfig.mqtt_password, custom_mqtt_password.getValue(), 40);
+     strlcpy(wifiConfig.bluetti_device_id, custom_bluetti_device.getValue(), 40);
      eeprom_saveconfig();
   }
 

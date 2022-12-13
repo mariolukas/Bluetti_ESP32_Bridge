@@ -46,7 +46,7 @@ String map_field_name(enum field_names f_name){
         return "serial_number";
         break;
       case ARM_VERSION:
-        return "arm_vrsion";
+        return "arm_version";
         break;
       case DSP_VERSION:
         return "dsp_version";
@@ -155,8 +155,16 @@ void initMQTT(){
     
     client.setServer(settings.mqtt_server, atoi(settings.mqtt_port));
     client.setCallback(callback);
+
+    bool connect_result;
+    const char connect_id[] = "Bluetti_ESP32";
+    if (settings.mqtt_username) {
+        connect_result = client.connect(connect_id, settings.mqtt_username, settings.mqtt_password);
+    } else {
+        connect_result = client.connect(connect_id);
+    }
     
-    if (client.connect("Bluetti_ESP32")) {
+    if (connect_result) {
         
         Serial.println("Connected to MQTT Server... ");
 
