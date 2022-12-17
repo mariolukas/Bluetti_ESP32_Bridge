@@ -100,9 +100,7 @@ States are published to
 
 ## TODO
 
-* MQTT credentials
 * add full feature set to device files
-* adding a web interface to the ESP32
 * adding support for OLED display
 * adding support for SD-Card reader, for writing csv data to an sd-card
 * adding logging poll commands
