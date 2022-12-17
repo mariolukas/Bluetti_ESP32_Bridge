@@ -36,6 +36,8 @@ You will need to install a board support package for your ESP32. Additionally th
 
 * https://github.com/tzapu/WiFiManager
 * https://github.com/knolleary/pubsubclient
+* https://github.com/me-no-dev/ESPAsyncWebServer
+* https://github.com/me-no-dev/AsyncTCP/archive
 
 Change the partition scheme with Tools -> Partition Scheme to 
  	
@@ -49,7 +51,7 @@ Optional: Do changes in config.h file. The device can be set by changing 'BLUETT
 
 Finally upload the Sketch to your ESP32.
 
-*INFO*: Until now only BLUETTI_AC300 was tested. If you own one of the supported devices please let me know if it works.
+*INFO*: Until now only BLUETTI_AC300, BLUETTI_EP500P was tested. If you own one of the supported devices please let me know if it works.
 
 ### Usage
 
