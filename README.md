@@ -11,7 +11,7 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
   * AC200 (untested)
   * EB3A (untested) 
   * EP500 (untested)
-  * EP500P (untested)
+  * EP500P (tested)
 * supported BLUETTI functions
   * commands
     * ac output on/off
