@@ -6,6 +6,7 @@
 #include <WiFiManager.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <ElegantOTA.h>
 
 WebServer server(80);
 bool shouldSaveConfig = false;
@@ -22,7 +23,7 @@ void saveConfigCallback () {
 ESPBluettiSettings wifiConfig;
 
 ESPBluettiSettings get_esp32_bluetti_settings(){
-    return wifiConfig;  
+    return wifiConfig;
 }
 
 void eeprom_read(){
@@ -44,7 +45,7 @@ void eeprom_saveconfig(){
 void initBWifi(bool resetWifi){
 
   eeprom_read();
-  
+
   if (wifiConfig.salt != EEPROM_SALT) {
     Serial.println("Invalid settings in EEPROM, trying with defaults");
     ESPBluettiSettings defaults;
@@ -55,6 +56,8 @@ void initBWifi(bool resetWifi){
   WiFiManagerParameter custom_mqtt_port("port", "MQTT Server Port", mqtt_port, 6);
   WiFiManagerParameter custom_mqtt_username("username", "MQTT Username", "", 40);
   WiFiManagerParameter custom_mqtt_password("password", "MQTT Password", "", 40, "type=password");
+  WiFiManagerParameter custom_ota_username("ota_username", "OTA Username", "", 40);
+  WiFiManagerParameter custom_ota_password("ota_password", "OTA Password", "", 40, "type=password");
   WiFiManagerParameter custom_bluetti_device("bluetti", "Bluetti Bluetooth ID", bluetti_device_id, 40);
 
   WiFiManager wifiManager;
@@ -67,11 +70,13 @@ void initBWifi(bool resetWifi){
   }
 
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-  
+
   wifiManager.addParameter(&custom_mqtt_server);
   wifiManager.addParameter(&custom_mqtt_port);
   wifiManager.addParameter(&custom_mqtt_username);
   wifiManager.addParameter(&custom_mqtt_password);
+  wifiManager.addParameter(&custom_ota_username);
+  wifiManager.addParameter(&custom_ota_password);
   wifiManager.addParameter(&custom_bluetti_device);
 
   wifiManager.autoConnect("Bluetti_ESP32");
@@ -81,6 +86,8 @@ void initBWifi(bool resetWifi){
      strlcpy(wifiConfig.mqtt_port, custom_mqtt_port.getValue(), 6);
      strlcpy(wifiConfig.mqtt_username, custom_mqtt_username.getValue(), 40);
      strlcpy(wifiConfig.mqtt_password, custom_mqtt_password.getValue(), 40);
+     strlcpy(wifiConfig.ota_username, custom_ota_username.getValue(), 40);
+     strlcpy(wifiConfig.ota_password, custom_ota_password.getValue(), 40);
      strlcpy(wifiConfig.bluetti_device_id, custom_bluetti_device.getValue(), 40);
      eeprom_saveconfig();
   }
@@ -111,10 +118,16 @@ void initBWifi(bool resetWifi){
       delay(2000);
       initBWifi(true);
   });
-  
-  
+
+
 
   server.onNotFound(handleNotFound);
+
+  if (!wifiConfig.ota_username) {
+    ElegantOTA.begin(&server);
+  } else {
+    ElegantOTA.begin(&server, wifiConfig.ota_username, wifiConfig.ota_password);
+  }
 
   server.begin();
   Serial.println("HTTP server started");
@@ -126,13 +139,14 @@ void handleWebserver() {
 }
 
 void handleRoot() {
+  String local_ip = WiFi.localIP().toString();
   server.setContentLength(CONTENT_LENGTH_UNKNOWN);
   server.send(200, "text/html; charset=utf-8", "");
   server.sendContent("<HTML><HEAD><TITLE>device status</TITLE></HEAD><BODY>");
   server.sendContent("<table border='0'>");
-  String data = "<tr><td>host:</td><td>" + WiFi.localIP().toString() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/rebootDevice' target='_blank'>reboot this device</a></td></tr>";
-  data = data + "<tr><td>SSID:</td><td>" + WiFi.SSID() + "</td><td><a href='http://"+WiFi.localIP().toString()+"/resetConfig' target='_blank'>reset device config</a></td></tr>";
-  data = data + "<tr><td>WiFiRSSI:</td><td>" + (String)WiFi.RSSI() + "</td></tr>";
+  String data = "<tr><td>host:</td><td>" + local_ip + "</td><td><a href='http://" + local_ip + "/rebootDevice' target='_blank'>reboot this device</a></td></tr>";
+  data = data + "<tr><td>SSID:</td><td>" + WiFi.SSID() + "</td><td><a href='http://" + local_ip + "/resetConfig' target='_blank'>reset device config</a></td></tr>";
+  data = data + "<tr><td>WiFiRSSI:</td><td>" + (String)WiFi.RSSI() + "</td><td><a href='http://" + local_ip + "/update' target='_blank'>update firmware</a></td></tr>";
   data = data + "<tr><td>MAC:</td><td>" + WiFi.macAddress() + "</td></tr>";
   data = data + "<tr><td>uptime (ms):</td><td>" + millis() + "</td></tr>";
   data = data + "<tr><td>uptime (h):</td><td>" + millis() / 3600000 + "</td></tr>";
