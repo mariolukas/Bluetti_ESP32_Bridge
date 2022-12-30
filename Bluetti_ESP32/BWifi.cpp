@@ -22,7 +22,7 @@ void saveConfigCallback () {
 ESPBluettiSettings wifiConfig;
 
 ESPBluettiSettings get_esp32_bluetti_settings(){
-    return wifiConfig;  
+    return wifiConfig;
 }
 
 void eeprom_read(){
@@ -44,12 +44,6 @@ void eeprom_saveconfig(){
 void initBWifi(bool resetWifi){
 
   eeprom_read();
-  
-  if (wifiConfig.salt != EEPROM_SALT) {
-    Serial.println("Invalid settings in EEPROM, trying with defaults");
-    ESPBluettiSettings defaults;
-    wifiConfig = defaults;
-  }
 
   WiFiManagerParameter custom_mqtt_server("server", "MQTT Server Address", mqtt_server, 40);
   WiFiManagerParameter custom_mqtt_port("port", "MQTT Server Port", mqtt_port, 6);
@@ -64,17 +58,25 @@ void initBWifi(bool resetWifi){
     ESPBluettiSettings defaults;
     wifiConfig = defaults;
     eeprom_saveconfig();
+  } else if (wifiConfig.salt != EEPROM_SALT) {
+    Serial.println("Invalid settings in EEPROM, trying with defaults");
+    ESPBluettiSettings defaults;
+    wifiConfig = defaults;
+  } else {
+    wifiManager.setConfigPortalTimeout(300);
   }
 
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-  
+
   wifiManager.addParameter(&custom_mqtt_server);
   wifiManager.addParameter(&custom_mqtt_port);
   wifiManager.addParameter(&custom_mqtt_username);
   wifiManager.addParameter(&custom_mqtt_password);
   wifiManager.addParameter(&custom_bluetti_device);
 
-  wifiManager.autoConnect("Bluetti_ESP32");
+  if (!wifiManager.autoConnect("Bluetti_ESP32")) {
+    ESP.restart();
+  }
 
   if (shouldSaveConfig) {
      strlcpy(wifiConfig.mqtt_server, custom_mqtt_server.getValue(), 40);
