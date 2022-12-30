@@ -32,6 +32,8 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 
 ### Compiling and Flashing to ESP32
 
+#### Arduino IDE
+
 You will need to install a board support package for your ESP32. Additionally the follwing libraries are needed: 
 
 * https://github.com/tzapu/WiFiManager
@@ -39,7 +41,7 @@ You will need to install a board support package for your ESP32. Additionally th
 
 Change the partition scheme with Tools -> Partition Scheme to 
  	
-* Huge App (3MB No OTA/1MB SPIFFS)
+* Minimal SPIFFS (1.9 MB App with OTA/ 190KB SPIFFS)
  
 ![Wifi Manager start menu](doc/images/partition.png)
 
@@ -50,6 +52,29 @@ Optional: Do changes in config.h file. The device can be set by changing 'BLUETT
 Finally upload the Sketch to your ESP32.
 
 *INFO*: Until now only BLUETTI_AC300 was tested. If you own one of the supported devices please let me know if it works.
+
+#### PlatformIO
+
+Compiling
+```
+$ pio run
+```
+
+Flashing Factory Image
+```
+$ esptool.py write_flash 0x0 build/Bluetti_ESP32_Bridge.factory.bin 
+```
+
+Updating only App (don't delete settings)
+```
+# Write Partition A
+$ esptool.py write_flash 0x10000 build/Bluetti_ESP32_Bridge.ota.bin
+...
+# Write Partition B
+$ esptool.py write_flash 0x1F0000 build/Bluetti_ESP32_Bridge.ota.bin
+```
+
+The configuration interface also offers OTA updates. You can flash also `build/Bluetti_ESP32_Bridge.ota.bin` there.
 
 ### Usage
 
