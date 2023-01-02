@@ -1,15 +1,15 @@
 ## About
 This is an ESP32 based Bluetooth to MQTT Bride for BLUETTI power stations. The project is based on https://github.com/warhammerkid/bluetti_mqtt
-The code is tested on a AC300. Other Powerstations should also work but are untested yet. The discussion on https://diysolarforum.com/threads/monitoring-bluetti-systems.37870/ was a great help for understanding the protocol. 
+The code is tested on a AC300. Other Powerstations should also work but are untested yet. The discussion on https://diysolarforum.com/threads/monitoring-bluetti-systems.37870/ was a great help for understanding the protocol.
 
 ## Features
 
 * easy configuration with WiFi manager
 * mqtt support
 * support for BLUETTI power stations
-  * AC300 (tested) 
+  * AC300 (tested)
   * AC200 (untested)
-  * EB3A (untested) 
+  * EB3A (untested)
   * EP500 (untested)
   * EP500P (untested)
 * supported BLUETTI functions
@@ -34,20 +34,21 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 
 #### Arduino IDE
 
-You will need to install a board support package for your ESP32. Additionally the follwing libraries are needed: 
+You will need to install a board support package for your ESP32. Additionally the follwing libraries are needed:
 
 * https://github.com/tzapu/WiFiManager
 * https://github.com/knolleary/pubsubclient
+* https://github.com/ayushsharma82/ElegantOTA
 
-Change the partition scheme with Tools -> Partition Scheme to 
- 	
+Change the partition scheme with Tools -> Partition Scheme to
+
 * Minimal SPIFFS (1.9 MB App with OTA/ 190KB SPIFFS)
- 
+
 ![Wifi Manager start menu](doc/images/partition.png)
 
-This setting is required because the Bluetooth stack already uses a lot of the ESP32 memory. 
+This setting is required because the Bluetooth stack already uses a lot of the ESP32 memory.
 
-Optional: Do changes in config.h file. The device can be set by changing 'BLUETTI_TYPE'. 
+Optional: Do changes in config.h file. The device can be set by changing 'BLUETTI_TYPE'.
 
 Finally upload the Sketch to your ESP32.
 
@@ -62,7 +63,7 @@ $ pio run
 
 Flashing Factory Image
 ```
-$ esptool.py write_flash 0x0 build/Bluetti_ESP32_Bridge.factory.bin 
+$ esptool.py write_flash 0x0 build/Bluetti_ESP32_Bridge.factory.bin
 ```
 
 Updating only App (don't delete settings)
@@ -74,7 +75,7 @@ $ esptool.py write_flash 0x10000 build/Bluetti_ESP32_Bridge.ota.bin
 $ esptool.py write_flash 0x1F0000 build/Bluetti_ESP32_Bridge.ota.bin
 ```
 
-The configuration interface also offers OTA updates. You can flash also `build/Bluetti_ESP32_Bridge.ota.bin` there.
+The configuration interface also offers OTA updates. You can flash also `build/Bluetti_ESP32_Bridge.ota.bin` there. If you already configured your device you can use `http://<ip_address/update` to update your firmware (no-reconfiguration needed)
 
 ### Usage
 
@@ -82,18 +83,19 @@ Just connect the ESP32 to a power supply or the power station itself. Connect yo
 to the Wifi mangaer of the ESP32 firmware, it should show up as "ESP32_Bluetti".
 
 After the connection to the hotspot is established a wifi manager popup will appear. Otherwise
-open 192.168.4.1 in your local webbrowser. 
+open 192.168.4.1 in your local webbrowser.
 
 Select "Configure WiFi"
 
 ![Wifi Manager start menu](doc/images/wifi_manager.png)
 
-Configure your WiFi and set the address of your MQTT server and enter the Bluetooth ID of your 
-Bluetti Device. You can use a mobile phone and/or the Bluetti APP for finding the correct Bluetooth ID of your device.
+Configure your WiFi and set the address of your MQTT server and enter the Bluetooth ID of your
+Bluetti Device. Optionally you can specify username and password to protect the web OTA interface.
+You can use a mobile phone and/or the Bluetti APP for finding the correct Bluetooth ID of your device.
 
 ![Wifi Manager start menu](doc/images/wifi_setup.png)
 
-Save the settings. The ESP32 starts sending messages to your MQTT server. 
+Save the settings. The ESP32 starts sending messages to your MQTT server.
 
 Example ( ioBroker ):
 ![MQTT ioBroker](doc/images/iobroker.png)
@@ -101,14 +103,14 @@ Example ( ioBroker ):
 ### MQTT Topics
 
 #### Commands
-Commands are subscribed from 
+Commands are subscribed from
 
 * /bluetti/<your_device_id>/command
   * ac_output_on
   * dc_output_on
 
 #### State
-States are published to 
+States are published to
 * /bluetti/<your_device_id>/state
   * ac_output_on
   * dc_output_on
@@ -121,7 +123,7 @@ States are published to
   * arm_version
   * power_generation
   * total_battery_percent
-  
+
 
 ## TODO
 

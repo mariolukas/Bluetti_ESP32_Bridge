@@ -10,6 +10,8 @@ typedef struct{
   char mqtt_username[40] = "";
   char mqtt_password[40] = "";
   char bluetti_device_id[40] = "Bluetti Blutetooth Id";
+  char ota_username[40] = "";
+  char ota_password[40] = "";
 } ESPBluettiSettings;
 
 extern ESPBluettiSettings get_esp32_bluetti_settings();
