@@ -111,16 +111,16 @@ void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t le
                 
             }
             else{
-              //AddtoMsgView("skip filtered field: "+ String(bluetti_device_state[i].f_name));
+              //AddtoMsgView(String(millis()) + ": skip filtered field: "+ String(bluetti_device_state[i].f_name));
             }
         }
         
         break; 
       case 0x06:
-        AddtoMsgView("skip 0x06 request! page: "+ String(page) + " offset: " + offset);
+        AddtoMsgView(String(millis()) + ":skip 0x06 request! page: "+ String(page) + " offset: " + offset);
         break;
       default:
-        AddtoMsgView("skip unknow request! page: "+ String(page) + " offset: " + offset);
+        AddtoMsgView(String(millis()) + ":skip unknow request! page: "+ String(page) + " offset: " + offset);
         break;
     }
     

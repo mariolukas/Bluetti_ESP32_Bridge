@@ -11,7 +11,7 @@ void setup() {
   #ifdef RELAISMODE
     pinMode(RELAIS_PIN, OUTPUT);
     #ifdef DEBUG
-      Serial.println("deactivate relais contact");
+      Serial.println(F("deactivate relais contact"));
     #endif
     digitalWrite(RELAIS_PIN, RELAIS_LOW);
   #endif

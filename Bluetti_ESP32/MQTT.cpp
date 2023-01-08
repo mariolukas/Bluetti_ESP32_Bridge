@@ -131,7 +131,7 @@ void publishTopic(enum field_names field_name, String value){
   //sometimes we get empty values / wrong vales - all the time device_type is empty
   if (map_field_name(field_name) == "device_type" && value.length() < 3){
 
-    Serial.println("Error while publishTopic! 'device_type' can't be empty, reboot device");
+    Serial.println(F("Error while publishTopic! 'device_type' can't be empty, reboot device)"));
     ESP.restart();
    
   } 
@@ -172,7 +172,7 @@ void initMQTT(){
     Serial.print("Connecting to MQTT at: ");
     Serial.print(settings.mqtt_server);
     Serial.print(":");
-    Serial.println(settings.mqtt_port);
+    Serial.println(F(settings.mqtt_port));
     
     client.setServer(settings.mqtt_server, atoi(settings.mqtt_port));
     client.setCallback(callback);
@@ -187,7 +187,7 @@ void initMQTT(){
     
     if (connect_result) {
         
-      Serial.println("Connected to MQTT Server... ");
+      Serial.println(F("Connected to MQTT Server... "));
 
       // subscribe to topics for commands
       for (int i=0; i< sizeof(bluetti_device_command)/sizeof(device_field_data_t); i++){
@@ -212,12 +212,12 @@ void handleMQTT(){
     }
 
     if (!isMQTTconnected() && publishErrorCount > 5){
-      Serial.println(F("MQTT lost connection, try to reconnet"));
+      Serial.println(F("MQTT lost connection, try to reconnect"));
       client.disconnect();
       lastMQTTMessage=0;
       previousDeviceStatePublish=0;
       publishErrorCount=0;
-
+      AddtoMsgView(String(millis()) + ": MQTT connection lost, try reconnect");
       initMQTT();
 
     }

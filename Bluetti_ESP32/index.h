@@ -52,7 +52,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           <p>Bluetti device id: <span id="device_id">%DEVICE_ID%</span></p>
           <p>connected: <span id="bt_connected">%BT_CONNECTED%</span></p>
           <p>last msg time: <span id="bt_last_msg_time">%LAST_BT_MSG_TIME%</span></p>
-          <p>publish error: <span id="bt_error">%BT_ERROR%</span></p>
+          <p>publish errors: <span id="bt_error">%BT_ERROR%</span></p>
           </span></p>
         </div>
       </div>

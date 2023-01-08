@@ -34,14 +34,14 @@ ESPBluettiSettings get_esp32_bluetti_settings(){
 }
 
 void eeprom_read(){
-  Serial.println("Loading Values from EEPROM");
+  Serial.println(F("Loading Values from EEPROM"));
   EEPROM.begin(512);
   EEPROM.get(0, wifiConfig);
   EEPROM.end();
 }
 
 void eeprom_saveconfig(){
-  Serial.println("Saving Values to EEPROM");
+  Serial.println(F("Saving Values to EEPROM"));
   EEPROM.begin(512);
   EEPROM.put(0, wifiConfig);
   EEPROM.commit();
@@ -54,7 +54,7 @@ void initBWifi(bool resetWifi){
   eeprom_read();
   
   if (wifiConfig.salt != EEPROM_SALT) {
-    Serial.println("Invalid settings in EEPROM, trying with defaults");
+    Serial.println(F("Invalid settings in EEPROM, trying with defaults"));
     ESPBluettiSettings defaults;
     wifiConfig = defaults;
   }
@@ -98,14 +98,15 @@ void initBWifi(bool resetWifi){
     delay(500);
     Serial.print(".");
   }
+  
+  WiFi.setAutoReconnect(true);
 
-  Serial.println("");
-  Serial.println("IP address: ");
+  Serial.println(F(""));
+  Serial.println(F("IP address: "));
   Serial.println(WiFi.localIP());
 
-
   if (MDNS.begin(DEVICE_NAME)) {
-    Serial.println("MDNS responder started");
+    Serial.println(F("MDNS responder started"));
   }
 
   //setup web server handling
@@ -132,31 +133,39 @@ void initBWifi(bool resetWifi){
   server.addHandler(&events);
   
   server.begin();
-  Serial.println("HTTP server started");
+  Serial.println(F("HTTP server started"));
 
 }
 
 void handleWebserver() {
+  
+  //Serial.println(F("DEBUG handleWebserver"));
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println(F("WiFi is disconnected, try to reconnect..."));
+    WiFi.disconnect();
+    WiFi.reconnect();
+    AddtoMsgView(String(millis()) + ": WLAN ERROR! try to reconnect");
+    delay(1000);
+  }
+
   if ((millis() - lastTimeWebUpdate) > MSG_VIEWER_REFRESH_CYCLE*1000) {
-    
-    
+
     // Send Events to the Web Server with current data
     events.send("ping",NULL,millis());
     events.send(String(millis()).c_str(),"runtime",millis());
     events.send(String(WiFi.RSSI()).c_str(),"rssi",millis());
     events.send(String(isMQTTconnected()).c_str(),"mqtt_connected",millis());
-    events.send(String(getLastMQTTMessageTime()).c_str(),"last_mqtt_msg_time",millis());
+    events.send(String(getLastMQTTMessageTime()).c_str(),"mqtt_last_msg_time",millis());
     events.send(String(isBTconnected()).c_str(),"bt_connected",millis());
     events.send(String(getLastBTMessageTime()).c_str(),"bt_last_msg_time",millis());
     events.send(lastMsg.c_str(),"last_msg",millis());
-
-   
     
     lastTimeWebUpdate = millis();
   }
 }
 
 String processorWebsiteUpdates(const String& var){
+  
   if(var == "IP"){
     return String(WiFi.localIP().toString());
   }
@@ -173,10 +182,14 @@ String processorWebsiteUpdates(const String& var){
     return String(millis());
   }
   else if(var == "MQTT_IP"){
-    return String(wifiConfig.mqtt_server);
+    char msg[40];
+    strlcpy(msg, wifiConfig.mqtt_server, 40);
+    return msg;
   }
   else if(var == "MQTT_PORT"){
-    return String(wifiConfig.mqtt_port);
+    char msg[6];
+    strlcpy(msg, wifiConfig.mqtt_port, 6);
+    return msg;
   }
   else if(var == "MQTT_CONNECTED"){
     return String(isMQTTconnected());
@@ -185,7 +198,9 @@ String processorWebsiteUpdates(const String& var){
     return String(getLastMQTTMessageTime());
   }
   else if(var == "DEVICE_ID"){
-    return String(wifiConfig.bluetti_device_id);
+    char msg[40];
+    strlcpy(msg, wifiConfig.bluetti_device_id, 40);
+    return msg;
   }
   else if(var == "BT_CONNECTED"){
     return String(isBTconnected());
@@ -222,6 +237,4 @@ void AddtoMsgView(String data){
   else{
     lastMsg = lastMsg + "<p>" + data + "</p>";
   }
-
-  
 }
