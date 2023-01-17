@@ -18,6 +18,8 @@
 #define RELAIS_HIGH HIGH
 
 #define MAX_DISCONNECTED_TIME_UNTIL_REBOOT 2 //device will reboot when wlan/BT/MQTT is not connectet within x Minutes
+#define SLEEP_TIME_ON_BT_NOT_AVAIL 2 //device will sleep x minutes if restarted is triggered by bluetooth error
+                                     //set to 0 to disable
 
 #ifndef BLUETTI_TYPE
   #define BLUETTI_TYPE BLUETTI_AC300

@@ -206,7 +206,11 @@ void handleBluetooth(){
 
   if ((millis() - lastBTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
     Serial.println(F("BT is disconnected over allowed limit, reboot device"));
-    ESP.restart();
+    #ifdef SLEEP_TIME_ON_BT_NOT_AVAIL
+        esp_deep_sleep_start();
+    #else
+        ESP.restart();
+    #endif
   }
 
   if (connected) {

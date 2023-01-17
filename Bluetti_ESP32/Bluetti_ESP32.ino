@@ -12,6 +12,9 @@ void setup() {
     #endif
     digitalWrite(RELAIS_PIN, RELAIS_LOW);
   #endif
+  #ifdef SLEEP_TIME_ON_BT_NOT_AVAIL
+    esp_sleep_enable_timer_wakeup(SLEEP_TIME_ON_BT_NOT_AVAIL * 60 * 1000000ULL);
+  #endif
   initBWifi(false);
   initBluetooth();
   initMQTT();
