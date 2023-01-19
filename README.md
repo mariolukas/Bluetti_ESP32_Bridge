@@ -9,7 +9,7 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 * support for BLUETTI power stations
   * AC300 (tested) 
   * AC200 (untested)
-  * EB3A (untested) 
+  * EB3A (tested) 
   * EP500 (untested)
   * EP500P (untested)
 * supported BLUETTI functions
