@@ -34,7 +34,7 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 
 #### Arduino IDE
 
-You will need to install a board support package for your ESP32. Additionally the follwing libraries are needed: 
+You will need to install a board support package for your ESP32. Additionally the following libraries are needed: 
 
 * https://github.com/tzapu/WiFiManager
 * https://github.com/knolleary/pubsubclient
