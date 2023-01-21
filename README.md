@@ -2,6 +2,9 @@
 This is an ESP32 based Bluetooth to MQTT Bride for BLUETTI power stations. The project is based on https://github.com/warhammerkid/bluetti_mqtt
 The code is tested on a AC300. Other Powerstations should also work but are untested yet. The discussion on https://diysolarforum.com/threads/monitoring-bluetti-systems.37870/ was a great help for understanding the protocol. 
 
+## Community
+Join the Discord Server https://discord.gg/6ukb8rnk
+
 ## Features
 
 * easy configuration with WiFi manager
