@@ -12,11 +12,15 @@ const char index_html[] PROGMEM = R"rawliteral(
     .card { background-color: white; box-shadow: 2px 2px 12px 1px rgba(135, 105, 105, 0.5); }
     .cards { max-width: 800px; margin: 0 auto; display: grid; grid-gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
     .reading { font-size: 1.4rem; }
+    .version { margin-bottom: 1em; }
   </style>
 </head>
 <body>
   <div class="topnav">
     <h1>Bluetti MQTT Bridge web server</h1>
+    <div class="version">
+      Firmware Version: 0.1.0 (<a href='/update' target='_blank'>Update</a>)
+    </div>
   </div>
   <div class="content">
     <div class="cards">
