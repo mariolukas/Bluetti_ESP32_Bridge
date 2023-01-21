@@ -3,12 +3,15 @@
 #include "MQTT.h"
 #include "config.h"
 
+unsigned long lastTime1 = 0;
+unsigned long timerDelay1 = 3000;
+
 void setup() {
   Serial.begin(115200);
   #ifdef RELAISMODE
     pinMode(RELAIS_PIN, OUTPUT);
     #ifdef DEBUG
-      Serial.println("deactivate relais contact");
+      Serial.println(F("deactivate relais contact"));
     #endif
     digitalWrite(RELAIS_PIN, RELAIS_LOW);
   #endif
