@@ -8,6 +8,7 @@
 #include <ESPAsyncWebServer.h> // https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
 #include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 #include <ESPmDNS.h>
+#include <AsyncElegantOTA.h>
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
@@ -30,6 +31,7 @@ void saveConfigCallback () {
 ESPBluettiSettings wifiConfig;
 
 ESPBluettiSettings get_esp32_bluetti_settings(){
+    return wifiConfig;
     return wifiConfig;
 }
 
@@ -57,6 +59,8 @@ void initBWifi(bool resetWifi){
   WiFiManagerParameter custom_mqtt_port("port", "MQTT Server Port", mqtt_port, 6);
   WiFiManagerParameter custom_mqtt_username("username", "MQTT Username", "", 40);
   WiFiManagerParameter custom_mqtt_password("password", "MQTT Password", "", 40, "type=password");
+  WiFiManagerParameter custom_ota_username("ota_username", "OTA Username", "", 40);
+  WiFiManagerParameter custom_ota_password("ota_password", "OTA Password", "", 40, "type=password");
   WiFiManagerParameter custom_bluetti_device("bluetti", "Bluetti Bluetooth ID", bluetti_device_id, 40);
 
   WiFiManager wifiManager;
@@ -80,6 +84,8 @@ void initBWifi(bool resetWifi){
   wifiManager.addParameter(&custom_mqtt_port);
   wifiManager.addParameter(&custom_mqtt_username);
   wifiManager.addParameter(&custom_mqtt_password);
+  wifiManager.addParameter(&custom_ota_username);
+  wifiManager.addParameter(&custom_ota_password);
   wifiManager.addParameter(&custom_bluetti_device);
 
   if (!wifiManager.autoConnect("Bluetti_ESP32")) {
@@ -91,6 +97,8 @@ void initBWifi(bool resetWifi){
      strlcpy(wifiConfig.mqtt_port, custom_mqtt_port.getValue(), 6);
      strlcpy(wifiConfig.mqtt_username, custom_mqtt_username.getValue(), 40);
      strlcpy(wifiConfig.mqtt_password, custom_mqtt_password.getValue(), 40);
+     strlcpy(wifiConfig.ota_username, custom_ota_username.getValue(), 40);
+     strlcpy(wifiConfig.ota_password, custom_ota_password.getValue(), 40);
      strlcpy(wifiConfig.bluetti_device_id, custom_bluetti_device.getValue(), 40);
      eeprom_saveconfig();
   }
@@ -133,7 +141,13 @@ void initBWifi(bool resetWifi){
     client->send("hello my friend, I'm just your data feed!", NULL, millis(), 10000);
   });
   server.addHandler(&events);
-  
+
+  if (!wifiConfig.ota_username) {
+    AsyncElegantOTA.begin(&server);
+  } else {
+    AsyncElegantOTA.begin(&server, wifiConfig.ota_username, wifiConfig.ota_password);
+  }
+
   server.begin();
   Serial.println(F("HTTP server started"));
 
