@@ -9,7 +9,7 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 * support for BLUETTI power stations
   * AC300 (tested) 
   * AC200 (untested)
-  * EB3A (untested) 
+  * EB3A (tested) 
   * EP500 (untested)
   * EP500P (untested)
 * supported BLUETTI functions
@@ -34,7 +34,7 @@ The code is tested on a AC300. Other Powerstations should also work but are unte
 
 #### Arduino IDE
 
-You will need to install a board support package for your ESP32. Additionally the follwing libraries are needed: 
+You will need to install a board support package for your ESP32. Additionally the following libraries are needed: 
 
 * https://github.com/tzapu/WiFiManager
 * https://github.com/knolleary/pubsubclient
