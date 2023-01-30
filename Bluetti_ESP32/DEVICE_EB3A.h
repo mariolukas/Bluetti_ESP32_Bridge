@@ -1,5 +1,5 @@
-#ifndef DEVICE_AC300_H
-#define DEVICE_AC300_H
+#ifndef DEVICE_EB3A_H
+#define DEVICE_EB3A_H
 #include "Arduino.h"
 
 /* Not implemented yet

@@ -24,10 +24,10 @@ class MyClientCallback : public BLEClientCallbacks {
 
   void onDisconnect(BLEClient* pclient) {
     connected = false;
-    Serial.println("onDisconnect");
+    Serial.println(F("onDisconnect"));
     #ifdef RELAISMODE
       #ifdef DEBUG
-        Serial.println("deactivate relais contact");
+        Serial.println(F("deactivate relais contact"));
       #endif
       digitalWrite(RELAIS_PIN, RELAIS_LOW);
     #endif
@@ -159,11 +159,11 @@ bool connectToServer() {
     connected = true;
      #ifdef RELAISMODE
       #ifdef DEBUG
-        Serial.println("activate relais contact");
+        Serial.println(F("activate relais contact"));
       #endif
       digitalWrite(RELAIS_PIN, RELAIS_HIGH);
     #endif
-    return true;
+
     return true;
 }
 
@@ -199,14 +199,18 @@ void handleBluetooth(){
     if (connectToServer()) {
       Serial.println(F("We are now connected to the Bluetti BLE Server."));
     } else {
-      Serial.println(F("We have failed to connect to the server; there is nothin more we will do."));
+      Serial.println(F("We have failed to connect to the server; there is nothing more we will do."));
     }
     doConnect = false;
   }
 
   if ((millis() - lastBTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
     Serial.println(F("BT is disconnected over allowed limit, reboot device"));
-    ESP.restart();
+    #ifdef SLEEP_TIME_ON_BT_NOT_AVAIL
+        esp_deep_sleep_start();
+    #else
+        ESP.restart();
+    #endif
   }
 
   if (connected) {
@@ -248,3 +252,5 @@ bool isBTconnected(){
 unsigned long getLastBTMessageTime(){
     return lastBTMessage;
 }
+
+
