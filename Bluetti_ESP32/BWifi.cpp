@@ -199,7 +199,12 @@ String processorWebsiteUpdates(const String& var){
   }
   else if(var == "MQTT_IP"){
     char msg[40];
-    strlcpy(msg, wifiConfig.mqtt_server, 40);
+    if (strlen(wifiConfig.mqtt_server) == 0){
+      strlcpy(msg, "No MQTT server configured", 40);
+    }else{
+      strlcpy(msg, wifiConfig.mqtt_server, 40);
+    }
+    
     return msg;
   }
   else if(var == "MQTT_PORT"){
