@@ -27,8 +27,8 @@ enum auto_sleep_mode {
 */
 
 enum LedMode {
-    LOW = 1,
-    HIGH = 2,
+    MIN = 1,
+    MAX = 2,
     SOS = 3,
     OFF = 4  
 };
