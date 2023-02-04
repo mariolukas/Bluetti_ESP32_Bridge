@@ -39,8 +39,11 @@ String map_field_name(enum field_names f_name){
       case AC_INPUT_POWER:
         return "ac_input_power";
         break;
-      case PACK_VOLTAGE:
-        return "pack_voltage";
+      case AC_INPUT_VOLTAGE:
+        return "ac_input_voltage";
+        break;
+      case INTERNAL_PACK_VOLTAGE:
+        return "internal_pack_voltage";
         break;
       case SERIAL_NUMBER:
         return "serial_number";
@@ -66,11 +69,35 @@ String map_field_name(enum field_names f_name){
       case INTERNAL_AC_VOLTAGE:
         return "internal_ac_voltage";
         break;
+      case INTERNAL_AC_FREQUENCY:
+        return "internal_ac_frequency";
+        break;
       case INTERNAL_CURRENT_ONE:
         return "internal_current_one";
         break;
       case PACK_NUM_MAX:
         return "pack_max_num";
+        break;
+      case INTERNAL_DC_INPUT_VOLTAGE:
+        return "internal_dc_input_voltage";
+        break;
+      case LED_MODE:
+        return "led_mode";
+        break;
+      case POWER_OFF:
+        return "power_off";
+        break;
+      case ECO_ON:
+        return "eco_on";
+        break;
+      case ECO_SHUTDOWN:
+        return "eco_shutdown";
+        break;
+      case CHARGING_MODE:
+        return "charging_mode";
+        break;
+      case POWER_LIFTING_ON:
+        return "power_lifting_on";
         break;
       default:
         return "unknown";
@@ -190,6 +217,9 @@ void initMQTT(){
       Serial.println(F("Connected to MQTT Server... "));
 
       // subscribe to topics for commands
+      //Serial.println(sizeof(bluetti_device_command));
+      //Serial.println(sizeof(device_field_data_t));
+      //Serial.println((sizeof(bluetti_device_command)/sizeof(device_field_data_t)).toString());
       for (int i=0; i< sizeof(bluetti_device_command)/sizeof(device_field_data_t); i++){
         subscribeTopic(bluetti_device_command[i].f_name);
       }
