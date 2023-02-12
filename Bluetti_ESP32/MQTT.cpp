@@ -107,10 +107,78 @@ String map_field_name(enum field_names f_name){
   
 }
 
+//There is no reflection to do string to enum
+//There are a couple of ways to work aroung it... but basically are just "case" statements
+//Wapped them in a fuction
+String map_command_value(String command_name, String value){
+  String toRet = value;
+  value.toUpperCase();
+  command_name.toUpperCase(); //force case indipendence
+
+  //on / off commands
+  if(command_name == "POWER_OFF" || command_name == "AC_OUTPUT_ON" || command_name == "DC_OUTPUT_ON" || command_name == "ECO_ON" || command_name == "POWER_LIFTING_ON") {
+    if (value == "ON") {
+      toRet = "1";
+    }
+    if (value == "OFF") {
+      toRet = "0";
+    }
+  }
+
+  //See DEVICE_EB3A enums
+  if(command_name == "LED_MODE"){
+    if (value == "LED_LOW") {
+      toRet = "1";
+    }
+    if (value == "LED_HIGH") {
+      toRet = "2";
+    }
+    if (value == "LED_SOS") {
+      toRet = "3";
+    }
+    if (value == "LED_OFF") {
+      toRet = "4";
+    }
+  }
+
+  //See DEVICE_EB3A enums
+  if(command_name == "ECO_SHUTDOWN"){
+    if (value == "ONE_HOUR") {
+      toRet = "1";
+    }
+    if (value == "TWO_HOURS") {
+      toRet = "2";
+    }
+    if (value == "THREE_HOURS") {
+      toRet = "3";
+    }
+    if (value == "FOUR_HOURS") {
+      toRet = "4";
+    }
+  }
+
+  //See DEVICE_EB3A enums
+  if(command_name == "CHARGING_MODE"){
+    if (value == "STANDARD") {
+      toRet = "0";
+    }
+    if (value == "SILENT") {
+      toRet = "1";
+    }
+    if (value == "TURBO") {
+      toRet = "2";
+    }
+  }
+
+
+  return toRet;
+}
+
 // Callback function
 void callback(char* topic, byte* payload, unsigned int length) {
   payload[length] = '\0';
   String topic_path = String(topic);
+  topic_path.toLowerCase();//in case we recieve DC_OUTPUT_ON instead of the expected dc_output_on
   
   Serial.print("MQTT Message arrived on topic: ");
   Serial.print(topic);
@@ -127,85 +195,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
             command.page = bluetti_device_command[i].f_page;
             command.offset = bluetti_device_command[i].f_offset;
             
-            //Quick&Dirty (FIXME): map ON, OFF, LOW, HIGH, SOS, ... to numeric values for the command to send by BL
-            //e.g. for "power_off" from "ON" to "1"
 			      String current_name = map_field_name(bluetti_device_command[i].f_name);
-            if(current_name == "power_off") {
-                  if (strPayload == "ON") {
-                    strPayload = "1";
-                  }
-            } 
-            else if(current_name == "led_mode") {
-                  if (strPayload == "LED_LOW") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "LED_HIGH") {
-                    strPayload = "2";
-                  }
-                  else if (strPayload == "LED_SOS") {
-                    strPayload = "3";
-                  }
-                  else if (strPayload == "LED_OFF") {
-                    strPayload = "4";
-                  }
-            } 
-            else if(current_name == "eco_shutdown") {
-                  if (strPayload == "ONE_HOUR") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "TWO_HOURS") {
-                    strPayload = "2";
-                  }
-                  else if (strPayload == "THREE_HOURS") {
-                    strPayload = "3";
-                  }
-                  else if (strPayload == "FOUR_HOURS") {
-                    strPayload = "4";
-                  }
-            } 
-            else if(current_name == "charging_mode") {
-                  if (strPayload == "STANDARD") {
-                    strPayload = "0";
-                  }
-                  else if (strPayload == "SILENT") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "TURBO") {
-                    strPayload = "2";
-                  }
-			      }
-            else if(current_name == "ac_output_on") {
-                  if (strPayload == "ON") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "OFF") {
-                    strPayload = "0";
-                  }
-            }
-            else if(current_name == "dc_output_on") {
-                  if (strPayload == "ON") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "OFF") {
-                    strPayload = "0";
-                  }
-            }
-            else if(current_name == "eco_on") {
-                  if (strPayload == "ON") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "OFF") {
-                    strPayload = "0";
-                  }
-            }
-            else if(current_name == "power_lifting_on") {
-                  if (strPayload == "ON") {
-                    strPayload = "1";
-                  }
-                  else if (strPayload == "OFF") {
-                    strPayload = "0";
-                  }
-            }
+            strPayload = map_command_value(current_name,strPayload);
     }
   }
   Serial.print(" Payload - switched: ");

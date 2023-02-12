@@ -42,7 +42,7 @@ enum EcoShutdown {
 };
 
 enum ChargingMode {
-   STANDARD = 0,
+    STANDARD = 0,
     SILENT = 1,
     TURBO = 2
 };
