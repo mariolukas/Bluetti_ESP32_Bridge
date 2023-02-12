@@ -9,8 +9,6 @@ extern void publishDeviceState();
 extern void publishDeviceStateStatus();
 extern void deviceServoPress(int degree);
 extern void handleMQTT();
-//TODO: for Command test with no mqtt
-extern void callback_str(char* topic, String strPayload, unsigned int length);
 extern void initMQTT();
 extern bool isMQTTconnected();
 extern int getPublishErrorCount();
