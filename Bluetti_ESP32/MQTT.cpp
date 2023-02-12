@@ -12,6 +12,7 @@ PubSubClient client(mqttClient);
 int publishErrorCount = 0;
 unsigned long lastMQTTMessage = 0;
 unsigned long previousDeviceStatePublish = 0;
+unsigned long previousDeviceStateStatusPublish = 0;
 
 String map_field_name(enum field_names f_name){
    switch(f_name) {
@@ -39,8 +40,11 @@ String map_field_name(enum field_names f_name){
       case AC_INPUT_POWER:
         return "ac_input_power";
         break;
-      case PACK_VOLTAGE:
-        return "pack_voltage";
+      case AC_INPUT_VOLTAGE:
+        return "ac_input_voltage";
+        break;
+      case INTERNAL_PACK_VOLTAGE:
+        return "internal_pack_voltage";
         break;
       case SERIAL_NUMBER:
         return "serial_number";
@@ -66,11 +70,35 @@ String map_field_name(enum field_names f_name){
       case INTERNAL_AC_VOLTAGE:
         return "internal_ac_voltage";
         break;
+      case INTERNAL_AC_FREQUENCY:
+        return "internal_ac_frequency";
+        break;
       case INTERNAL_CURRENT_ONE:
         return "internal_current_one";
         break;
       case PACK_NUM_MAX:
         return "pack_max_num";
+        break;
+      case INTERNAL_DC_INPUT_VOLTAGE:
+        return "internal_dc_input_voltage";
+        break;
+      case LED_MODE:
+        return "led_mode";
+        break;
+      case POWER_OFF:
+        return "power_off";
+        break;
+      case ECO_ON:
+        return "eco_on";
+        break;
+      case ECO_SHUTDOWN:
+        return "eco_shutdown";
+        break;
+      case CHARGING_MODE:
+        return "charging_mode";
+        break;
+      case POWER_LIFTING_ON:
+        return "power_lifting_on";
         break;
       default:
         return "unknown";
@@ -98,9 +126,91 @@ void callback(char* topic, byte* payload, unsigned int length) {
       if (topic_path.indexOf(map_field_name(bluetti_device_command[i].f_name)) > -1){
             command.page = bluetti_device_command[i].f_page;
             command.offset = bluetti_device_command[i].f_offset;
-      }
+            
+            //Quick&Dirty (FIXME): map ON, OFF, LOW, HIGH, SOS, ... to numeric values for the command to send by BL
+            //e.g. for "power_off" from "ON" to "1"
+			      String current_name = map_field_name(bluetti_device_command[i].f_name);
+            if(current_name == "power_off") {
+                  if (strPayload == "ON") {
+                    strPayload = "1";
+                  }
+            } 
+            else if(current_name == "led_mode") {
+                  if (strPayload == "LED_LOW") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "LED_HIGH") {
+                    strPayload = "2";
+                  }
+                  else if (strPayload == "LED_SOS") {
+                    strPayload = "3";
+                  }
+                  else if (strPayload == "LED_OFF") {
+                    strPayload = "4";
+                  }
+            } 
+            else if(current_name == "eco_shutdown") {
+                  if (strPayload == "ONE_HOUR") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "TWO_HOURS") {
+                    strPayload = "2";
+                  }
+                  else if (strPayload == "THREE_HOURS") {
+                    strPayload = "3";
+                  }
+                  else if (strPayload == "FOUR_HOURS") {
+                    strPayload = "4";
+                  }
+            } 
+            else if(current_name == "charging_mode") {
+                  if (strPayload == "STANDARD") {
+                    strPayload = "0";
+                  }
+                  else if (strPayload == "SILENT") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "TURBO") {
+                    strPayload = "2";
+                  }
+			      }
+            else if(current_name == "ac_output_on") {
+                  if (strPayload == "ON") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "OFF") {
+                    strPayload = "0";
+                  }
+            }
+            else if(current_name == "dc_output_on") {
+                  if (strPayload == "ON") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "OFF") {
+                    strPayload = "0";
+                  }
+            }
+            else if(current_name == "eco_on") {
+                  if (strPayload == "ON") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "OFF") {
+                    strPayload = "0";
+                  }
+            }
+            else if(current_name == "power_lifting_on") {
+                  if (strPayload == "ON") {
+                    strPayload = "1";
+                  }
+                  else if (strPayload == "OFF") {
+                    strPayload = "0";
+                  }
+            }
+    }
   }
-  
+  Serial.print(" Payload - switched: ");
+  Serial.println(strPayload);
+
   command.len = swap_bytes(strPayload.toInt());
   command.check_sum = modbus_crc((uint8_t*)&command,6);
   lastMQTTMessage = millis();
@@ -165,6 +275,20 @@ void publishDeviceState(){
  
 }
 
+void publishDeviceStateStatus(){
+  char publishTopicBuf[1024];
+
+  ESPBluettiSettings settings = get_esp32_bluetti_settings();
+  sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, "device_status" ); 
+  String value = "{\"MQTTconnected\":" + String(isMQTTconnected()) + "\", \"BTconnected\":" + String(isBTconnected()) + "}"; 
+  if (!client.publish(publishTopicBuf, value.c_str() )){
+    publishErrorCount++;
+  }
+  lastMQTTMessage = millis();
+  previousDeviceStateStatusPublish = millis();
+ 
+}
+
 void initMQTT(){
 
     enum field_names f_name;
@@ -195,6 +319,7 @@ void initMQTT(){
       }
 
       publishDeviceState();
+      publishDeviceStateStatus();
     }
 
     
@@ -210,12 +335,15 @@ void handleMQTT(){
     if ((millis() - previousDeviceStatePublish) > (DEVICE_STATE_UPDATE * 60000)){ 
       publishDeviceState();
     }
-
+    if ((millis() - previousDeviceStateStatusPublish) > (DEVICE_STATE_STATUS_UPDATE * 60000)){ 
+      publishDeviceStateStatus();
+    }
     if (!isMQTTconnected() && publishErrorCount > 5){
       Serial.println(F("MQTT lost connection, try to reconnect"));
       client.disconnect();
       lastMQTTMessage=0;
       previousDeviceStatePublish=0;
+      previousDeviceStateStatusPublish=0;
       publishErrorCount=0;
       AddtoMsgView(String(millis()) + ": MQTT connection lost, try reconnect");
       initMQTT();
@@ -241,6 +369,9 @@ int getPublishErrorCount(){
 unsigned long getLastMQTTMessageTime(){
     return lastMQTTMessage;
 }
-unsigned long getLastMQTDeviceStateMessageTime(){
+unsigned long getLastMQTTDeviceStateMessageTime(){
     return previousDeviceStatePublish;
+}
+unsigned long getLastMQTTDeviceStateStatusMessageTime(){
+    return previousDeviceStateStatusPublish;
 }
