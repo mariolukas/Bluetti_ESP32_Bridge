@@ -10,6 +10,6 @@
 #define EP500P          5
 #define AC500           6
 
-#define POWER_STATION(type) (BLUETTI_TYPE==BLUETTI_##type)
+#define POWER_STATION(type) (BLUETTI_TYPE==type)
 
 #endif
