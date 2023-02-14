@@ -224,6 +224,7 @@ void subscribeTopic(enum field_names field_name) {
 
 void publishTopic(enum field_names field_name, String value){
   char publishTopicBuf[1024];
+  ESPBluettiSettings settings = get_esp32_bluetti_settings();
  
 #ifdef DEBUG
   Serial.println("publish topic for field: " +  map_field_name(field_name));
@@ -236,18 +237,20 @@ void publishTopic(enum field_names field_name, String value){
     ESP.restart();
    
   } 
-
-  ESPBluettiSettings settings = get_esp32_bluetti_settings();
-  sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, map_field_name(field_name).c_str() ); 
-  lastMQTTMessage = millis();
-  if (!client.publish(publishTopicBuf, value.c_str() )){
-    publishErrorCount++;
-    AddtoMsgView(String(lastMQTTMessage) + ": publish ERROR! " + map_field_name(field_name) + " -> " + value);
-  }
-  else{
-    AddtoMsgView(String(lastMQTTMessage) + ": " + map_field_name(field_name) + " -> " + value);
-  }
   
+  sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, map_field_name(field_name).c_str() ); 
+  if (strlen(settings.mqtt_server) == 0){
+    AddtoMsgView(String(millis()) +": " + map_field_name(field_name) + " -> " + value); 
+  }else{
+    lastMQTTMessage = millis();
+    if (!client.publish(publishTopicBuf, value.c_str() )){
+      publishErrorCount++;
+      AddtoMsgView(String(lastMQTTMessage) + ": publish ERROR! " + map_field_name(field_name) + " -> " + value);
+    }
+    else{
+      AddtoMsgView(String(lastMQTTMessage) + ": " + map_field_name(field_name) + " -> " + value);
+    }
+  }
   
  
 }
@@ -284,6 +287,10 @@ void initMQTT(){
 
     enum field_names f_name;
     ESPBluettiSettings settings = get_esp32_bluetti_settings();
+    if (strlen(settings.mqtt_server) == 0){
+      Serial.println("No MQTT server configured");
+      return;
+    }
     Serial.print("Connecting to MQTT at: ");
     Serial.print(settings.mqtt_server);
     Serial.print(":");
@@ -318,6 +325,10 @@ void initMQTT(){
 };
 
 void handleMQTT(){
+    ESPBluettiSettings settings = get_esp32_bluetti_settings();
+    if (strlen(settings.mqtt_server) == 0){
+      return;
+    }
     if ((millis() - lastMQTTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
       Serial.println(F("MQTT is disconnected over allowed limit, reboot device"));
       ESP.restart();
