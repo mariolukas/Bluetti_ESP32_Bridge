@@ -55,16 +55,16 @@ void parse_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t l
 
         for(int i=0; i< sizeof(bluetti_device_state)/sizeof(device_field_data_t); i++){
 
-            // filter fields not in range, reworked by AlexBurghardt
+            // filter fields not in range, reworked by https://github.com/AlexBurghardt
             // the original code didn't work completely and skipped some fields to be published
             if(
               // it's the correct page
               bluetti_device_state[i].f_page == page && 
               // data offset greater than or equal to page offset
               bluetti_device_state[i].f_offset >= offset &&
-              // local offset does not exeed the page length, likely not needed because of the last condition check
+              // local offset does not exceed the page length, likely not needed because of the last condition check
               ((2* ((int)bluetti_device_state[i].f_offset - (int)offset)) + HEADER_SIZE) <= length &&
-              // local offset + data size do not exeed the page length
+              // local offset + data size do not exceed the page length
               ((2* ((int)bluetti_device_state[i].f_offset - (int)offset + bluetti_device_state[i].f_size)) + HEADER_SIZE) <= length
             ){
     
@@ -117,17 +117,17 @@ void parse_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t l
             }
             else{
               /* causes way too many messages, for debugging only
-              //AddtoMsgView(String(millis()) + ": skip filtered field: "+ String(bluetti_device_state[i].f_name));
+              AddtoMsgView(String(millis()) + ": skip filtered field: "+ String(bluetti_device_state[i].f_name));
               */
             }
         }
         
         break; 
       case 0x06:
-        AddtoMsgView(String(millis()) + ":skip 0x06 request! page: "+ String(page) + " offset: " + offset);
+        AddtoMsgView(String(millis()) + ": skip 0x06 request! page: "+ String(page) + " offset: " + offset);
         break;
       default:
-        AddtoMsgView(String(millis()) + ":skip unknow request! page: "+ String(page) + " offset: " + offset);
+        AddtoMsgView(String(millis()) + ": skip unknow request! page: "+ String(page) + " offset: " + offset);
         break;
 
     }
