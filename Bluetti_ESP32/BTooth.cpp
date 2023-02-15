@@ -60,13 +60,9 @@ void initBluetooth(){
   BLEDevice::init("");
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new BluettiAdvertisedDeviceCallbacks());
-  pBLEScan->setInterval(1349);
-  //pBLEScan->setWindow(449);
-  pBLEScan->setWindow(5000);
+  pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
-  //pBLEScan->start(5, false);
-  pBLEScan->start(40, false);
-  
+  pBLEScan->start(5, false);
   
   commandHandleQueue = xQueueCreate( 5, sizeof(bt_command_t ) );
   sendQueue = xQueueCreate( 5, sizeof(bt_command_t) );
