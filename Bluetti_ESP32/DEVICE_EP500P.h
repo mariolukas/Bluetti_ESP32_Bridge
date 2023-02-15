@@ -44,12 +44,15 @@ static device_field_data_t bluetti_device_state[] = {
   {AC_OUTPUT_MODE,            0x00, 0x46, 1, 0, 0, UINT_FIELD},
 
   {INTERNAL_AC_VOLTAGE,       0x00, 0x47, 1, 1, 0, DECIMAL_FIELD},
+  //INTERNAL_POWER_ONE AC Output usage
   {INTERNAL_CURRENT_ONE,      0x00, 0x48, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_POWER_ONE,        0x00, 0x49, 1, 0, 0, UINT_FIELD},
   {INTERNAL_AC_FREQUENCY,     0x00, 0x4A, 1, 2, 0, DECIMAL_FIELD},
+  //INTERNAL_POWER_TWO AC Internal usage?
   {INTERNAL_CURRENT_TWO,      0x00, 0x4B, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_POWER_TWO,        0x00, 0x4C, 1, 0, 0, UINT_FIELD},
   {AC_INPUT_VOLTAGE,          0x00, 0x4D, 1, 1, 0, DECIMAL_FIELD},
+  //INTERNAL_POWER_THREE AC Load from grid
   {INTERNAL_CURRENT_THREE,    0x00, 0x4E, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_POWER_THREE,      0x00, 0x4F, 1, 0, 0, UINT_FIELD},
   
@@ -98,7 +101,14 @@ static device_field_data_t bluetti_device_command[] = {
   {GRID_CHARGE_ON,    0x0B, 0xC3, 1, 0, 0, BOOL_FIELD},
   {UPS_MODE,          0x0B, 0xB9, 1, 0, 0, UINT_FIELD},
   {PACK_NUM,          0x0B, 0xBE, 1, 0, 0, UINT_FIELD},
-
+/* from EB3A
+  {LED_MODE,          0x0B, 0xDA, 1, 0, 0, ENUM_FIELD},
+  {POWER_OFF,         0x0B, 0xF4, 1, 0, 0, BOOL_FIELD},
+  {ECO_ON,            0x0B, 0xF7, 1, 0, 0, BOOL_FIELD},
+  {ECO_SHUTDOWN,      0x0B, 0xF8, 1, 0, 0, ENUM_FIELD}, 
+  {CHARGING_MODE,     0x0B, 0xF9, 1, 0, 0, ENUM_FIELD},
+  {POWER_LIFTING_ON,  0x0B, 0xFA, 1, 0, 0, BOOL_FIELD},
+*/
   // Time after the display switches off -> WRITE
   // Caution: there is no check on the device, if the value is within the list of alowed values.
   // for allowed values see <enum auto_sleep_mode> above, use of other values seems to confuse the HMI.
@@ -107,16 +117,21 @@ static device_field_data_t bluetti_device_command[] = {
   {AUTO_SLEEP_MODE,   0x0B, 0xF5, 1, 0, 0, UINT_FIELD}
 };
 
-static device_field_data_t bluetti_polling_command[] = {
- 
-  {FIELD_UNDEFINED, 0x00, 0x0A, 0x28 ,0 , 0, TYPE_UNDEFINED},
-  
-  {FIELD_UNDEFINED, 0x00, 0x46, 0x15 ,0 , 0, TYPE_UNDEFINED},
 
-  {FIELD_UNDEFINED, 0x0B, 0xB9, 0x3D ,0 , 0, TYPE_UNDEFINED},
+static device_field_data_t bluetti_polling_command[] = {
+  {FIELD_UNDEFINED, 0x00, 0x0A, 0x28 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x46, 0x15 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x0B, 0xDA, 0x01 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x0B, 0xF5, 0x07 ,0 , 0, TYPE_UNDEFINED},
   //Pack Polling
   {FIELD_UNDEFINED, 0x00, 0x5B, 0x25 ,0 , 0, TYPE_UNDEFINED}
- 
+};
+
+static device_field_data_t bluetti_logging_command[] = {
+  {FIELD_UNDEFINED, 0x00, 0x0A, 0x35 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x46, 0x42 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x88, 0x4A ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x0B, 0xB8, 0x43 ,0 , 0, TYPE_UNDEFINED}
 };
 
 

@@ -109,9 +109,6 @@ String map_field_name(enum field_names f_name){
       case PACK_BATTERY_PERCENT:
         return "pack_battery_percent";
         break;
-      case INTERNAL_PACK_VOLTAGE:
-        return "internal_pack_voltage";
-        break;
       case INTERNAL_DC_INPUT_VOLTAGE:
         return "internal_dc_input_voltage";
         break;
@@ -169,9 +166,6 @@ String map_field_name(enum field_names f_name){
       case INTERNAL_CELL16_VOLTAGE:
         return "internal_cell16_voltage";    
         break;     
-      case INTERNAL_DC_INPUT_VOLTAGE:
-        return "internal_dc_input_voltage";
-        break;
       case LED_MODE:
         return "led_mode";
         break;
@@ -367,7 +361,7 @@ void publishDeviceStateStatus(){
 
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
   sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, "device_status" ); 
-  String value = "{\"MQTTconnected\":" + String(isMQTTconnected()) + "\", \"BTconnected\":" + String(isBTconnected()) + "}"; 
+  String value = "{\"MQTTconnected\":" + String(isMQTTconnected()) + ", \"BTconnected\":" + String(isBTconnected()) + "}"; 
   if (!client.publish(publishTopicBuf, value.c_str() )){
     publishErrorCount++;
   }
