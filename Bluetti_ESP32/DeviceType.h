@@ -27,6 +27,7 @@ enum field_names {
   AC_INPUT_VOLTAGE,
   AC_INPUT_FREQUENCY,
   PACK_VOLTAGE,
+  INTERNAL_PACK_VOLTAGE,
   SERIAL_NUMBER,
   ARM_VERSION,
   DSP_VERSION,
@@ -48,6 +49,7 @@ enum field_names {
   INTERNAL_DC_INPUT_CURRENT,
   PACK_BATTERY_PERCENT,
   PACK_NUM,
+  PACK_NUM_MAX,
   INTERNAL_PACK_VOLTAGE,
   INTERNAL_CELL01_VOLTAGE,
   INTERNAL_CELL02_VOLTAGE,
@@ -65,7 +67,13 @@ enum field_names {
   INTERNAL_CELL14_VOLTAGE,
   INTERNAL_CELL15_VOLTAGE,
   INTERNAL_CELL16_VOLTAGE,
-  PACK_NUM_MAX
+  LED_MODE,
+  POWER_OFF,
+  ECO_ON,
+  ECO_SHUTDOWN,
+  CHARGING_MODE,
+  POWER_LIFTING_ON
+
 };
 
 typedef struct device_field_data {
@@ -77,6 +85,5 @@ typedef struct device_field_data {
   int8_t f_enum;
   enum field_types f_type;
 } device_field_data_t;
-
 
 #endif

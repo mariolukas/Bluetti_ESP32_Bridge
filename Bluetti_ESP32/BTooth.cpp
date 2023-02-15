@@ -47,7 +47,7 @@ class BluettiAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
      ESPBluettiSettings settings = get_esp32_bluetti_settings();
     // We have found a device, let us now see if it contains the service we are looking for.
-    if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID) && advertisedDevice.getName().compare(settings.bluetti_device_id)) {
+    if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID) && (strcmp(advertisedDevice.getName().c_str(),settings.bluetti_device_id)==0) ) {
       BLEDevice::getScan()->stop();
       bluettiDevice = new BLEAdvertisedDevice(advertisedDevice);
       doConnect = true;
@@ -99,7 +99,7 @@ static void notifyCallback(
 
     bt_command_t command_handle;
     if(xQueueReceive(commandHandleQueue, &command_handle, 500)){
-      pase_bluetooth_data(command_handle.page, command_handle.offset, pData, length);
+      parse_bluetooth_data(command_handle.page, command_handle.offset, pData, length);
     }
    
 }

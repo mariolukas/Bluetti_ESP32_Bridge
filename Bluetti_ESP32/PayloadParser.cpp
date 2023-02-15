@@ -42,98 +42,100 @@ String parse_string_field(uint8_t data[]) {
   return String((char*)data);
 }
 
-String pase_enum_field(uint8_t data[]) {
-  return "";
+// not implemented yet, leads to nothing
+String parse_enum_field(uint8_t data[]){
+    return "";
 }
 
-void pase_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t length) {
+void parse_bluetooth_data(uint8_t page, uint8_t offset, uint8_t* pData, size_t length){
   char Byte_In_Hex_offset[3];
   char Byte_In_Hex_page[3];
   sprintf(Byte_In_Hex_offset, "%x", offset);
   sprintf(Byte_In_Hex_page, "%x", page);
-
-  switch (pData[1]) {
+  
+    switch(pData[1]){
       // range request
 
     case 0x03:
 
       for (int i = 0; i < sizeof(bluetti_device_state) / sizeof(device_field_data_t); i++) {
 
-        // filter fields not in range
-        /*
-            if(bluetti_device_state[i].f_page == page && 
-               bluetti_device_state[i].f_offset >= offset &&
-               bluetti_device_state[i].f_offset <= (offset + length)/2 &&
-               bluetti_device_state[i].f_offset + bluetti_device_state[i].f_size-1 >= offset &&
-               bluetti_device_state[i].f_offset + bluetti_device_state[i].f_size-1 <= (offset + length)/2
-              )*/
-        if (
-          // it's the correct page
-          bluetti_device_state[i].f_page == page &&
-          // data offset greater than or equal to page offset
-          bluetti_device_state[i].f_offset >= offset &&
-          // local offset does not exeed the page length, likely not needed because of the last condition check
-          ((2 * ((int)bluetti_device_state[i].f_offset - (int)offset)) + HEADER_SIZE) <= length &&
-          // local offset + data size do not exeed the page length
-          ((2 * ((int)bluetti_device_state[i].f_offset - (int)offset + bluetti_device_state[i].f_size)) + HEADER_SIZE) <= length) {
 
-          uint8_t data_start = (2 * ((int)bluetti_device_state[i].f_offset - (int)offset)) + HEADER_SIZE;
-          uint8_t data_end = (data_start + 2 * bluetti_device_state[i].f_size);
-          uint8_t data_payload_field[data_end - data_start];
+            // filter fields not in range, reworked by https://github.com/AlexBurghardt
+            // the original code didn't work completely and skipped some fields to be published
+            if(
+              // it's the correct page
+              bluetti_device_state[i].f_page == page && 
+              // data offset greater than or equal to page offset
+              bluetti_device_state[i].f_offset >= offset &&
+              // local offset does not exceed the page length, likely not needed because of the last condition check
+              ((2* ((int)bluetti_device_state[i].f_offset - (int)offset)) + HEADER_SIZE) <= length &&
+              // local offset + data size do not exceed the page length
+              ((2* ((int)bluetti_device_state[i].f_offset - (int)offset + bluetti_device_state[i].f_size)) + HEADER_SIZE) <= length
+            ){
+    
+                uint8_t data_start = (2* ((int)bluetti_device_state[i].f_offset - (int)offset)) + HEADER_SIZE;
+                uint8_t data_end = (data_start + 2 * bluetti_device_state[i].f_size);
+                uint8_t data_payload_field[data_end - data_start];
+                
+                int p_index = 0;
+                for (int i=data_start; i<= data_end; i++){
+                      data_payload_field[p_index] = pData[i-1];
+                      p_index++;
+                }
 
-          int p_index = 0;
-          for (int i = data_start; i <= data_end; i++) {
-            data_payload_field[p_index] = pData[i - 1];
-            p_index++;
-          }
+                switch (bluetti_device_state[i].f_type){
+                 
+                  case UINT_FIELD:
+                    publishTopic(bluetti_device_state[i].f_name, String(parse_uint_field(data_payload_field)));
+                    break;
+    
+                  case BOOL_FIELD:
+                    publishTopic(bluetti_device_state[i].f_name, String((int)parse_bool_field(data_payload_field)));
+                    break;
+    
+                  case DECIMAL_FIELD:
+                    publishTopic(bluetti_device_state[i].f_name, String(parse_decimal_field(data_payload_field, bluetti_device_state[i].f_scale ), 2) );
+                    break;
+    
+                  case SN_FIELD:  
+                    char sn[16];
+                    sprintf(sn, "%lld", parse_serial_field(data_payload_field));
+                    publishTopic(bluetti_device_state[i].f_name, String(sn));
+                    break;
+    
+                  case VERSION_FIELD:
+                    publishTopic(bluetti_device_state[i].f_name, String(parse_version_field(data_payload_field),2) );    
+                    break;
 
-          switch (bluetti_device_state[i].f_type) {
-
-            case UINT_FIELD:
-              publishTopic(bluetti_device_state[i].f_name, String(parse_uint_field(data_payload_field)));
-              break;
-
-            case BOOL_FIELD:
-              publishTopic(bluetti_device_state[i].f_name, String((int)parse_bool_field(data_payload_field)));
-              break;
-
-            case DECIMAL_FIELD:
-              publishTopic(bluetti_device_state[i].f_name, String(parse_decimal_field(data_payload_field, bluetti_device_state[i].f_scale), 2));
-              break;
-
-            case SN_FIELD:
-              char sn[16];
-              sprintf(sn, "%lld", parse_serial_field(data_payload_field));
-              publishTopic(bluetti_device_state[i].f_name, String(sn));
-              break;
-
-            case VERSION_FIELD:
-              publishTopic(bluetti_device_state[i].f_name, String(parse_version_field(data_payload_field), 2));
-              break;
-
-            case STRING_FIELD:
-              publishTopic(bluetti_device_state[i].f_name, parse_string_field(data_payload_field));
-              break;
-
-            case ENUM_FIELD:
-              publishTopic(bluetti_device_state[i].f_name, pase_enum_field(data_payload_field));
-              break;
-            default:
-              break;
-          }
-
-        } else {
-          //AddtoMsgView(String(millis()) + ": skip filtered field: "+ Byte_In_Hex_page + " offset: " + Byte_In_Hex_offset);
+                  case STRING_FIELD:
+                    publishTopic(bluetti_device_state[i].f_name, parse_string_field(data_payload_field));
+                    break;
+                  // doesn't work yet, not implemented further
+                  case ENUM_FIELD:
+                    publishTopic(bluetti_device_state[i].f_name, parse_enum_field(data_payload_field));
+                    break;
+                  default:
+                    break;
+                  
+                }
+                
+            }
+            else{
+              /* causes way too many messages, for debugging only
+              //AddtoMsgView(String(millis()) + ": skip filtered field: "+ Byte_In_Hex_page + " offset: " + Byte_In_Hex_offset);
+              */
+            }
         }
-      }
+        
+        break; 
+      case 0x06:
+        AddtoMsgView(String(millis()) + ":skip 0x06 request! page: " + Byte_In_Hex_page + " offset: " + Byte_In_Hex_offset);
+        break;
+      default:
+        AddtoMsgView(String(millis()) + ":skip unknow request! page: " + Byte_In_Hex_page + " offset: " + Byte_In_Hex_offset);
+        break;
 
-      break;
-    case 0x06:
-
-      AddtoMsgView(String(millis()) + ":skip 0x06 request! page: " + Byte_In_Hex_page + " offset: " + Byte_In_Hex_offset);
-      break;
-    default:
-      AddtoMsgView(String(millis()) + ":skip unknow request! page: " + Byte_In_Hex_page + " offset: " + Byte_In_Hex_offset);
-      break;
-  }
+    }
+    
 }
