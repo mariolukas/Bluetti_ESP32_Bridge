@@ -17,14 +17,14 @@ enum ups_mode {
     STANDARD = 3,
     TIME_CONTROl = 4  
 };
-
+*/
 enum auto_sleep_mode {
   THIRTY_SECONDS = 2,
   ONE_MINNUTE = 3,
   FIVE_MINUTES = 4,
   NEVER = 5  
 };
-*/
+
 
 // { FIELD_NAME, PAGE, OFFSET, SIZE, SCALE (if scale is needed e.g. decimal value, defaults to 0) , ENUM (if data is enum, defaults to 0) , FIELD_TYPE }
 static device_field_data_t bluetti_device_state[] = {
@@ -41,159 +41,98 @@ static device_field_data_t bluetti_device_state[] = {
   {TOTAL_BATTERY_PERCENT,     0x00, 0x2B, 1, 0, 0, UINT_FIELD},
   {AC_OUTPUT_ON,              0x00, 0x30, 1, 0, 0, BOOL_FIELD},
   {DC_OUTPUT_ON,              0x00, 0x31, 1, 0, 0, BOOL_FIELD},
+  {AC_OUTPUT_MODE,            0x00, 0x46, 1, 0, 0, UINT_FIELD},
 
-  /*Page 0x00 Details  //for all scale check needed
-  {AC_OUTPUT_MODE,            0x00, 0x46, 1, 0, 0, ENUM_FIELD}, //check size needed!!
   {INTERNAL_AC_VOLTAGE,       0x00, 0x47, 1, 1, 0, DECIMAL_FIELD},
+  //INTERNAL_POWER_ONE AC Output usage
   {INTERNAL_CURRENT_ONE,      0x00, 0x48, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_POWER_ONE,        0x00, 0x49, 1, 0, 0, UINT_FIELD},
-  {INTERNAL_AC_FREQUENCY,     0x00, 0x4A, 2, 0, 0, DECIMAL_FIELD},
-  {INTERNAL_CURRENT_TWO,      0x00, 0x4B, 1, 0, 0, DECIMAL_FIELD},
+  {INTERNAL_AC_FREQUENCY,     0x00, 0x4A, 1, 2, 0, DECIMAL_FIELD},
+  //INTERNAL_POWER_TWO AC Internal usage?
+  {INTERNAL_CURRENT_TWO,      0x00, 0x4B, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_POWER_TWO,        0x00, 0x4C, 1, 0, 0, UINT_FIELD},
-  {AC_INPUT_VOLTAGE,          0x00, 0x4D, 1, 0, 0, DECIMAL_FIELD},
-  {INTERNAL_CURRENT_THREE,    0x00, 0x4E, 1, 0, 0, DECIMAL_FIELD},
+  {AC_INPUT_VOLTAGE,          0x00, 0x4D, 1, 1, 0, DECIMAL_FIELD},
+  //INTERNAL_POWER_THREE AC Load from grid
+  {INTERNAL_CURRENT_THREE,    0x00, 0x4E, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_POWER_THREE,      0x00, 0x4F, 1, 0, 0, UINT_FIELD},
+  
   {AC_INPUT_FREQUENCY,        0x00, 0x50, 1, 2, 0, DECIMAL_FIELD},
   {INTERNAL_DC_INPUT_VOLTAGE, 0x00, 0x56, 1, 1, 0, DECIMAL_FIELD},
   {INTERNAL_DC_INPUT_POWER,   0x00, 0x57, 1, 0, 0, UINT_FIELD},
-  {INTERNAL_DC_INPUT_CURRENT, 0x00, 0x88, 1, 1, 0, DECIMAL_FIELD},
-  */
-  
-  /*
-  //Page 0x00 Battery Details
+  {INTERNAL_DC_INPUT_CURRENT, 0x00, 0x58, 1, 1, 0, DECIMAL_FIELD},
   {PACK_NUM_MAX,              0x00, 0x5B, 1, 0, 0, UINT_FIELD },
-  */
 
-  /*
-  //Page 0x00 Battery Data 
-  {PACK_VOLTAGE,              0x00, 0x5C, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_PACK_VOLTAGE,     0x00, 0x5C, 1, 1 ,0, DECIMAL_FIELD},
   {PACK_BATTERY_PERCENT,      0x00, 0x5E, 1, 0, 0, UINT_FIELD},
-  {PACK_NUM,                  0x00, 0x60, 1, 0, 0, UINT_FIELD},
-  {CELL_VOLTAGE,              0x00, 0x69, 16, 2 ,0, DECIMAL_FIELD},
-  */
 
-  /*Page 0x00 - Controls 
-  {UPS_MODE,                  0x0B, 0xB9, 1, 0, 0, ENUM_FIELD}, //check size needed!!
-  {SPLIT_PHASE_ON,            0x0B, 0xBC, 1, 0, 0, BOOL_FIELD},
-  {SPLIT_MACHINE_MODE,        0x0B, 0xBD, 1, 0, 0, ENUM_FIELD}, //check size needed!!
-  {PACK_NUM,                  0x0B, 0xBE, 1, 0, 0, UINT_FIELD},
-  {AC_OUTPUT_ON,              0x0B, 0xBF, 1, 0, 0, BOOL_FIELD},
-  {DC_OUTPUT_ON,              0x0B, 0xC0, 1, 0, 0, BOOL_FIELD},
-  {GRID_CHARGE_ON,            0x0B, 0xC3, 1, 0, 0, BOOL_FIELD},
-  {TIME_CONTROL_ON,           0x0B, 0xC5, 1, 0, 0, BOOL_FIELD},
-  {BATTERY_RANGE_START,       0x0B, 0xC7, 1, 0, 0, UINT_FIELD},
-  {BATTERY_RANGE_END,         0x0B, 0xC8, 1, 0, 0, UINT_FIELD},
-  // 0xD7-0xD9 is the current device time & date without a timezone
-  {BLUETOOTH_CONNECTED,       0x0B, 0xDC, 1, 0, 0, BOOL_FIELD},
-  self.struct.add_bool_field('bluetooth_connected', 0x0B, 0xDC)
-  // 0xDF-0xF0 is the time control programming
-   {AUTO_SLEEP_MODE,          0x0B, 0xF5, 1, 0, 0, ENUM_FIELD}, //check size needed!!
-  */
+  {PACK_NUM,                  0x00, 0x60, 1, 0, 0, UINT_FIELD},
+  
+  {INTERNAL_CELL01_VOLTAGE,    0x00, 0x69, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL02_VOLTAGE,    0x00, 0x6A, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL03_VOLTAGE,    0x00, 0x6B, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL04_VOLTAGE,    0x00, 0x6C, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL05_VOLTAGE,    0x00, 0x6D, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL06_VOLTAGE,    0x00, 0x6E, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL07_VOLTAGE,    0x00, 0x6F, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL08_VOLTAGE,    0x00, 0x70, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL09_VOLTAGE,    0x00, 0x71, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL10_VOLTAGE,   0x00, 0x72, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL11_VOLTAGE,   0x00, 0x73, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL12_VOLTAGE,   0x00, 0x74, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL13_VOLTAGE,   0x00, 0x75, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL14_VOLTAGE,   0x00, 0x76, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL15_VOLTAGE,   0x00, 0x77, 1, 2 ,0, DECIMAL_FIELD},
+  {INTERNAL_CELL16_VOLTAGE,   0x00, 0x78, 1, 2 ,0, DECIMAL_FIELD},
+  
+  // {INTERNAL_DC_INPUT_CURRENT, 0x00, 0x88, 1, 1, 0, DECIMAL_FIELD},
+
+  //Page 0x00 - Controls 
+   {UPS_MODE,                 0x0B, 0xB9, 1, 0, 0, UINT_FIELD},
+   //{PACK_NUM,                 0x0B, 0xBE, 1, 0, 0, UINT_FIELD},
+   {GRID_CHARGE_ON,           0x0B, 0xC3, 1, 0, 0, BOOL_FIELD},
+   {AUTO_SLEEP_MODE,          0x0B, 0xF5, 1, 0, 0, UINT_FIELD}
   
 };
 
 static device_field_data_t bluetti_device_command[] = {
-  /*Page 0x00 Core */
+  /*Page 0x0B Core */
   {AC_OUTPUT_ON,      0x0B, 0xBF, 1, 0, 0, BOOL_FIELD}, 
-  {DC_OUTPUT_ON,      0x0B, 0xC0, 1, 0, 0, BOOL_FIELD}
+  {DC_OUTPUT_ON,      0x0B, 0xC0, 1, 0, 0, BOOL_FIELD},
+  {GRID_CHARGE_ON,    0x0B, 0xC3, 1, 0, 0, BOOL_FIELD},
+  {UPS_MODE,          0x0B, 0xB9, 1, 0, 0, UINT_FIELD},
+  {PACK_NUM,          0x0B, 0xBE, 1, 0, 0, UINT_FIELD},
+/* from EB3A
+  {LED_MODE,          0x0B, 0xDA, 1, 0, 0, ENUM_FIELD},
+  {POWER_OFF,         0x0B, 0xF4, 1, 0, 0, BOOL_FIELD},
+  {ECO_ON,            0x0B, 0xF7, 1, 0, 0, BOOL_FIELD},
+  {ECO_SHUTDOWN,      0x0B, 0xF8, 1, 0, 0, ENUM_FIELD}, 
+  {CHARGING_MODE,     0x0B, 0xF9, 1, 0, 0, ENUM_FIELD},
+  {POWER_LIFTING_ON,  0x0B, 0xFA, 1, 0, 0, BOOL_FIELD},
+*/
+  // Time after the display switches off -> WRITE
+  // Caution: there is no check on the device, if the value is within the list of alowed values.
+  // for allowed values see <enum auto_sleep_mode> above, use of other values seems to confuse the HMI.
+  // The possibility to set this parameter on the HMI (Diplay) disappears.
+  // But by writing an allowed value it turns back to normality, don't be afraid
+  {AUTO_SLEEP_MODE,   0x0B, 0xF5, 1, 0, 0, UINT_FIELD}
 };
+
 
 static device_field_data_t bluetti_polling_command[] = {
   {FIELD_UNDEFINED, 0x00, 0x0A, 0x28 ,0 , 0, TYPE_UNDEFINED},
   {FIELD_UNDEFINED, 0x00, 0x46, 0x15 ,0 , 0, TYPE_UNDEFINED},
-  {FIELD_UNDEFINED, 0x0B, 0xB9, 0x3D ,0 , 0, TYPE_UNDEFINED}
-};
-
-/*
-static device_field_data_t bluetti_polling_command[] = {
-  //polling_commands
-  {FIELD_UNDEFINED, 0x00, 0x0A, 0x28 ,0 , 0, TYPE_UNDEFINED},
-  {FIELD_UNDEFINED, 0x00, 0x46, 0x15 ,0 , 0, TYPE_UNDEFINED},
-  {FIELD_UNDEFINED, 0x0B, 0xB9, 0x3D ,0 , 0, TYPE_UNDEFINED},
-  //pack_polling_commands
+  {FIELD_UNDEFINED, 0x0B, 0xDA, 0x01 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x0B, 0xF5, 0x07 ,0 , 0, TYPE_UNDEFINED},
+  //Pack Polling
   {FIELD_UNDEFINED, 0x00, 0x5B, 0x25 ,0 , 0, TYPE_UNDEFINED}
 };
 
-*/
+static device_field_data_t bluetti_logging_command[] = {
+  {FIELD_UNDEFINED, 0x00, 0x0A, 0x35 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x46, 0x42 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x88, 0x4A ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x0B, 0xB8, 0x43 ,0 , 0, TYPE_UNDEFINED}
+};
 
-/*
-     # Page 0x00 - Core
-        self.struct.add_string_field('device_type', 0x00, 0x0A, 6)
-        self.struct.add_sn_field('serial_number', 0x00, 0x11)
-        self.struct.add_version_field('arm_version', 0x00, 0x17)
-        self.struct.add_version_field('dsp_version', 0x00, 0x19)
-        self.struct.add_uint_field('dc_input_power', 0x00, 0x24)
-        self.struct.add_uint_field('ac_input_power', 0x00, 0x25)
-        self.struct.add_uint_field('ac_output_power', 0x00, 0x26)
-        self.struct.add_uint_field('dc_output_power', 0x00, 0x27)
-        self.struct.add_decimal_field('power_generation', 0x00, 0x29, 1)  # Total power generated since last reset (kwh)
-        self.struct.add_uint_field('total_battery_percent', 0x00, 0x2B)
-        self.struct.add_bool_field('ac_output_on', 0x00, 0x30)
-        self.struct.add_bool_field('dc_output_on', 0x00, 0x31)
 
-        # Page 0x00 - Details
-        self.struct.add_enum_field('ac_output_mode', 0x00, 0x46, OutputMode)
-        self.struct.add_decimal_field('internal_ac_voltage', 0x00, 0x47, 1)
-        self.struct.add_decimal_field('internal_current_one', 0x00, 0x48, 1)
-        self.struct.add_uint_field('internal_power_one', 0x00, 0x49)
-        self.struct.add_decimal_field('internal_ac_frequency', 0x00, 0x4A, 2)
-        self.struct.add_decimal_field('internal_current_two', 0x00, 0x4B, 1)
-        self.struct.add_uint_field('internal_power_two', 0x00, 0x4C)
-        self.struct.add_decimal_field('ac_input_voltage', 0x00, 0x4D, 1)
-        self.struct.add_decimal_field('internal_current_three', 0x00, 0x4E, 1)
-        self.struct.add_uint_field('internal_power_three', 0x00, 0x4F)
-        self.struct.add_decimal_field('ac_input_frequency', 0x00, 0x50, 2)
-        self.struct.add_decimal_field('internal_dc_input_voltage', 0x00, 0x56, 1)
-        self.struct.add_uint_field('internal_dc_input_power', 0x00, 0x57)
-        self.struct.add_decimal_field('internal_dc_input_current', 0x00, 0x58, 1)
-
-        # Page 0x00 - Battery Data
-        self.struct.add_uint_field('pack_num_max', 0x00, 0x5B)
-        self.struct.add_decimal_field('pack_voltage', 0x00, 0x5C, 1)  # Full pack voltage
-        self.struct.add_uint_field('pack_battery_percent', 0x00, 0x5E)
-        self.struct.add_uint_field('pack_num', 0x00, 0x60)
-        self.struct.add_decimal_array_field('cell_voltages', 0x00, 0x69, 16, 2)
-
-        # Page 0x0B - Controls
-        self.struct.add_enum_field('ups_mode', 0x0B, 0xB9, UpsMode)
-        self.struct.add_bool_field('split_phase_on', 0x0B, 0xBC)
-        self.struct.add_enum_field('split_phase_machine_mode', 0x0B, 0xBD, MachineAddress)
-        self.struct.add_uint_field('pack_num', 0x0B, 0xBE)
-        self.struct.add_bool_field('ac_output_on', 0x0B, 0xBF)
-        self.struct.add_bool_field('dc_output_on', 0x0B, 0xC0)
-        self.struct.add_bool_field('grid_charge_on', 0x0B, 0xC3)
-        self.struct.add_bool_field('time_control_on', 0x0B, 0xC5)
-        self.struct.add_uint_field('battery_range_start', 0x0B, 0xC7)
-        self.struct.add_uint_field('battery_range_end', 0x0B, 0xC8)
-        # 0xD7-0xD9 is the current device time & date without a timezone
-        self.struct.add_bool_field('bluetooth_connected', 0x0B, 0xDC)
-        # 0xDF-0xF0 is the time control programming
-        self.struct.add_enum_field('auto_sleep_mode', 0x0B, 0xF5, AutoSleepMode)
-
-        super().__init__(address, 'EP500P', sn)
-
-    @property
-    def polling_commands(self) -> List[QueryRangeCommand]:
-        return [
-            QueryRangeCommand(0x00, 0x0A, 0x28),
-            QueryRangeCommand(0x00, 0x46, 0x15),
-            QueryRangeCommand(0x0B, 0xB9, 0x3D),
-        ]
-
-    @property
-    def pack_polling_commands(self) -> List[QueryRangeCommand]:
-        return [QueryRangeCommand(0x00, 0x5B, 0x25)]
-
-    @property
-    def logging_commands(self) -> List[QueryRangeCommand]:
-        return [
-            QueryRangeCommand(0x00, 0x00, 0x46),
-            QueryRangeCommand(0x00, 0x46, 0x15),
-            QueryRangeCommand(0x0B, 0xB9, 0x3D),
-        ]
-
-    @property
-    def pack_logging_commands(self) -> List[QueryRangeCommand]:
-        return [QueryRangeCommand(0x00, 0x5B, 0x77)]
-*/
 #endif
