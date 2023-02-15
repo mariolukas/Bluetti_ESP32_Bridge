@@ -8,7 +8,7 @@
 #include <ESPAsyncWebServer.h> // https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
 #include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 #include <ESPmDNS.h>
-#include <AsyncElegantOTA.h>
+#include <AsyncElegantOTA.h> // https://github.com/ayushsharma82/AsyncElegantOTA/archive/master.zip
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
@@ -17,6 +17,7 @@ unsigned long lastTimeWebUpdate = 0;
 
 String lastMsg = ""; 
 
+bool msgViewerDetails = false;
 bool shouldSaveConfig = false;
 
 char mqtt_server[40] = "127.0.0.1";
@@ -50,6 +51,11 @@ void eeprom_saveconfig(){
   EEPROM.end();
 }
 
+void setWiFiPowerSavingMode(){
+  //esp_wifi_set_ps(WIFI_PS_MAX_MODEM); // maximum power saving, does not make sense here
+  //esp_wifi_set_ps(WIFI_PS_NONE); // will cause kernel panic and reboot on my ESP32 (AlexBurghardt)
+  esp_wifi_set_ps(WIFI_PS_MIN_MODEM); // default
+}
 
 void initBWifi(bool resetWifi){
 
@@ -120,7 +126,25 @@ void initBWifi(bool resetWifi){
   }
 
   //setup web server handling
+  #if MSG_VIEWER_DETAILS
+      msgViewerDetails = true;
+      Serial.println(F("webserver BT/MQTT variable logging enabled..."));
+    #else
+      msgViewerDetails = false;
+      Serial.println(F("webserver BT/MQTT variable logging disabled..."));
+  #endif
+
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send_P(200, "text/html", index_html, processorWebsiteUpdates);
+  });
+  server.on("/switchLogging", HTTP_GET, [](AsyncWebServerRequest *request){
+      msgViewerDetails = !msgViewerDetails;
+      if(msgViewerDetails){
+        Serial.println(F("webserver BT/MQTT variable logging enabled..."));
+      }
+      else{
+        Serial.println(F("webserver BT/MQTT variable logging disabled..."));
+      }
       request->send_P(200, "text/html", index_html, processorWebsiteUpdates);
   });
   server.on("/rebootDevice", [](AsyncWebServerRequest *request) {
@@ -174,7 +198,9 @@ void handleWebserver() {
     events.send(String(getLastMQTTMessageTime()).c_str(),"mqtt_last_msg_time",millis());
     events.send(String(isBTconnected()).c_str(),"bt_connected",millis());
     events.send(String(getLastBTMessageTime()).c_str(),"bt_last_msg_time",millis());
-    events.send(lastMsg.c_str(),"last_msg",millis());
+    if(msgViewerDetails){
+      events.send(lastMsg.c_str(),"last_msg",millis());
+    } 
     
     lastTimeWebUpdate = millis();
   }
@@ -185,16 +211,16 @@ String processorWebsiteUpdates(const String& var){
   if(var == "IP"){
     return String(WiFi.localIP().toString());
   }
-  if(var == "RSSI"){
+  else if(var == "RSSI"){
     return String(WiFi.RSSI());
   }
-  if(var == "SSID"){
+  else if(var == "SSID"){
     return String(WiFi.SSID());
   }
-  if(var == "MAC"){
+  else if(var == "MAC"){
     return String(WiFi.macAddress());
   }
-  if(var == "RUNTIME"){
+  else if(var == "RUNTIME"){
     return String(millis());
   }
   else if(var == "MQTT_IP"){
@@ -228,7 +254,12 @@ String processorWebsiteUpdates(const String& var){
     return String(getPublishErrorCount());
   }
   else if(var == "LAST_MSG"){
-    return String("...waiting for data...");
+    if (msgViewerDetails){
+      return String("...waiting for data...");
+    }
+    else{
+      return String("...disabled...");
+    }
   }
 }
 
