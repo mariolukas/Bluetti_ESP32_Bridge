@@ -19,7 +19,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <div class="topnav">
     <h1>Bluetti MQTT Bridge web server</h1>
     <div class="version">
-      Firmware Version: 0.1.0 (<a href='/update' target='_blank'>Update</a>)
+      Firmware Version: 0.1.1 (<a href='/update' target='_blank'>Update</a>)
     </div>
   </div>
   <div class="content">
@@ -61,6 +61,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         </div>
       </div>
       <div class="card">
+        <p><a href="/switchLogging" >switch logging mode</a></span></p>
         <p>last messages (time / value):</p>
           <p><span class="reading"></p>
           <p><span id="last_msg">%LAST_MSG%</span></p>
