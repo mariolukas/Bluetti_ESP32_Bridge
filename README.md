@@ -11,7 +11,7 @@ Join the Discord Server https://discord.gg/fWDSBTCVmB
 * mqtt support
 * support for BLUETTI power stations
   * AC300 (tested)
-  * AC200 (untested)
+  * AC200 (tested)
   * EB3A (tested)
   * EP500 (untested)
   * EP500P (tested)
