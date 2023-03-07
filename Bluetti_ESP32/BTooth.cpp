@@ -41,15 +41,15 @@ class BluettiAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
  /**
    * Called for each advertising BLE server.
    */
-  void onResult(BLEAdvertisedDevice advertisedDevice) {
+  void onResult(BLEAdvertisedDevice *advertisedDevice) {
     Serial.print(F("BLE Advertised Device found: "));
-    Serial.println(advertisedDevice.toString().c_str());
+    Serial.println(advertisedDevice->toString().c_str());
 
      ESPBluettiSettings settings = get_esp32_bluetti_settings();
     // We have found a device, let us now see if it contains the service we are looking for.
-    if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID) && (strcmp(advertisedDevice.getName().c_str(),settings.bluetti_device_id)==0) ) {
+    if (advertisedDevice->haveServiceUUID() && advertisedDevice->isAdvertisingService(serviceUUID) && (strcmp(advertisedDevice->getName().c_str(),settings.bluetti_device_id)==0) ) {
       BLEDevice::getScan()->stop();
-      bluettiDevice = new BLEAdvertisedDevice(advertisedDevice);
+      bluettiDevice = advertisedDevice;
       doConnect = true;
       doScan = true;
     }
@@ -104,7 +104,8 @@ static void notifyCallback(
 bool connectToServer() {
     Serial.print(F("Forming a connection to "));
     Serial.println(bluettiDevice->getAddress().toString().c_str());
-    
+
+    BLEDevice::setMTU(517); // set client to request maximum MTU from server (default is 23 otherwise)
     BLEClient*  pClient  = BLEDevice::createClient();
     Serial.println(F(" - Created client"));
 
@@ -113,7 +114,7 @@ bool connectToServer() {
     // Connect to the remove BLE Server.
     pClient->connect(bluettiDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     Serial.println(F(" - Connected to server"));
-    pClient->setMTU(517); //set client to request maximum MTU from server (default is 23 otherwise)
+    // pClient->setMTU(517); //set client to request maximum MTU from server (default is 23 otherwise)
   
     // Obtain a reference to the service we are after in the remote BLE server.
     BLERemoteService* pRemoteService = pClient->getService(serviceUUID);

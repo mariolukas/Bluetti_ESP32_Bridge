@@ -1,7 +1,7 @@
 #ifndef BTOOTH_H
 #define BTOOTH_H
 #include "Arduino.h"
-#include "BLEDevice.h"
+#include "NimBLEDevice.h"
 
 static boolean doConnect = false;
 static boolean connected = false;
