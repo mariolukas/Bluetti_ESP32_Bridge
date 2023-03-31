@@ -94,6 +94,7 @@ void initBWifi(bool resetWifi){
   wifiManager.addParameter(&custom_ota_username);
   wifiManager.addParameter(&custom_ota_password);
   wifiManager.addParameter(&custom_bluetti_device);
+  
   wifiManager.setAPCallback([&](WiFiManager* wifiManager) {
 		Serial.printf("Entered config mode:ip=%s, ssid='%s'\n", 
                         WiFi.softAPIP().toString().c_str(), 
@@ -107,7 +108,6 @@ void initBWifi(bool resetWifi){
   
   if (!wifiManager.autoConnect("Bluetti_ESP32")) {
     ESP.restart();
-    delay(1000);
   }
 
   if (shouldSaveConfig) {
@@ -127,13 +127,15 @@ void initBWifi(bool resetWifi){
     #ifdef DISPLAY
       disp_setPrevStateIcon(0);
       wifisignal(0);
+      delay(200);
+      Serial.print(".");
+      disp_setPrevStateIcon(1);
+      wifisignal(0);
+    #else
+      delay(500);
+      Serial.print(".");
     #endif
-    delay(200);
-    Serial.print(".");
-    disp_setPrevStateIcon(1);
-    wifisignal(0);
-    delay(200);
-    Serial.print(".");
+
   }
   
   WiFi.setAutoReconnect(true);
