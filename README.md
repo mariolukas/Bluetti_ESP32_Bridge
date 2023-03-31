@@ -147,7 +147,6 @@ Display functionality:
 ## TODO
 
 * add full feature set to device files
-* adding support for OLED display
 * adding support for SD-Card reader, for writing csv data to an sd-card
 * adding logging poll commands
 
