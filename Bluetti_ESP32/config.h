@@ -3,6 +3,7 @@
 #include "Arduino.h"
 
 #define DEBUG                 1
+//#define DISPLAY 1
 //#define RESET_WIFI_SETTINGS   1
 
 #define EEPROM_SALT 13374
