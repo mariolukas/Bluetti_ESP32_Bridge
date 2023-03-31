@@ -8,6 +8,7 @@ Join the Discord Server https://discord.gg/fWDSBTCVmB
 ## Features
 
 * easy configuration with WiFi manager
+* display support OLED 128x64
 * mqtt support
 * support for BLUETTI power stations
   * AC300 (tested)
@@ -128,6 +129,19 @@ States are published to
   * arm_version
   * power_generation
   * total_battery_percent
+
+## Display
+By default, display is disabled. To enable uncomment #define DISPLAY 1 in the file Bluetti_ESP32/config.h
+
+Display functionality:
+* Show current assiged IP address (AP mode or normal)
+* Show different wifi connection logo, depending on the mode its in and wifi Strength in normal mode (4 bars)
+* Show the running time of the device in the format "11d12h15m" Currently max until 49 days as this is the time millis() is reset. TODO fix this
+* ability to show status message, currently shows the init and running status. 
+* a progressbar is available but currently not used anywhere. (to see where it can be used)
+* a bluetooth icon is available, but currently not linked with the bluetooth connection itself.(TODO)
+
+![DisplayImage](doc/images/display.jpg)
 
 
 ## TODO
