@@ -9,7 +9,7 @@ Join the Discord Server https://discord.gg/fWDSBTCVmB
 
 * easy configuration with WiFi manager
 * display support OLED 128x64 
-  * tested ESP32 WROOM with display: https://www.amazon.com/HiLetgo-ESP-WROOM-32-Bluetooth-Development-Display/dp/B072HBW53G/ref=sr_1_5?keywords=esp32+oled&qid=1680508043&sr=8-5 
+  * tested ESP32 WROOM with display: https://github.com/LilyGO/TTGO-T2-ESP32
 * mqtt support
 * support for BLUETTI power stations
   * AC300 (tested)
