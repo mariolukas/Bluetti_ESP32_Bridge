@@ -8,7 +8,8 @@ Join the Discord Server https://discord.gg/fWDSBTCVmB
 ## Features
 
 * easy configuration with WiFi manager
-* display support OLED 128x64
+* display support OLED 128x64 
+  * tested ESP32 WROOM with display: https://github.com/LilyGO/TTGO-T2-ESP32
 * mqtt support
 * support for BLUETTI power stations
   * AC300 (tested)
