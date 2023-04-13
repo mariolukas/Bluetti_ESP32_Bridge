@@ -4,12 +4,12 @@
 
 #define DEBUG                 1
 // Display config section, comment DISPLAYSSD1306 to disable display
-#define DEBUGDISP 1
+//#define DEBUGDISP 1
 //#define DISPLAYSSD1306  1
 #define DISPLAY_SCL_PORT 4
 #define DISPLAY_SDA_PORT 5
 
-//#define RESET_WIFI_SETTINGS   1
+//#define RESET_WIFI_SETTINGS   
 
 #define EEPROM_SALT 13374
 
