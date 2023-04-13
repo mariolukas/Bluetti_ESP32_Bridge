@@ -3,6 +3,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <display.h>
+#include <config.h>
+
 // used for millis loops
 const unsigned long flProgressBar = 200; // speed of update progressbar
 const unsigned long flWifiBTStarting = 500; //flash speed Of wifi & BT icon on starting 
@@ -37,7 +39,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 void initDisplay()
 {
 
-    Wire.begin(5, 4);
+    Wire.begin(DISPLAY_SDA_PORT, DISPLAY_SCL_PORT);
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C, false, false))
     {
         Serial.println(F("display: SSD1306 allocation failed"));
