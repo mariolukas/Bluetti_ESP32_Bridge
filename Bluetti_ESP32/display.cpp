@@ -38,7 +38,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void initDisplay()
 {
-
+    #if DISPLAY_RST_PORT
+        // Reset required for some displays like LoRa TTGO v1.0
+        pinMode(DISPLAY_RST_PORT, OUTPUT);
+        digitalWrite(DISPLAY_RST_PORT, HIGH);
+        delay(20);
+        digitalWrite(DISPLAY_RST_PORT, LOW);
+        delay(20);
+        digitalWrite(DISPLAY_RST_PORT, HIGH);
+        delay(20);
+    #endif
     Wire.begin(DISPLAY_SDA_PORT, DISPLAY_SCL_PORT);
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C, false, false))
     {
