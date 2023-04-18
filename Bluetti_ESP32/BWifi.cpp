@@ -9,6 +9,7 @@
 #include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 #include <ESPmDNS.h>
 #include <AsyncElegantOTA.h> // https://github.com/ayushsharma82/AsyncElegantOTA/archive/master.zip
+#include "display.h"
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
@@ -93,7 +94,18 @@ void initBWifi(bool resetWifi){
   wifiManager.addParameter(&custom_ota_username);
   wifiManager.addParameter(&custom_ota_password);
   wifiManager.addParameter(&custom_bluetti_device);
-
+  
+  wifiManager.setAPCallback([&](WiFiManager* wifiManager) {
+		Serial.printf("Entered config mode:ip=%s, ssid='%s'\n", 
+                        WiFi.softAPIP().toString().c_str(), 
+                        wifiManager->getConfigPortalSSID().c_str());
+                        #ifdef DISPLAYSSD1306
+                          wifisignal(2); //AP mode
+                          wrDisp_IP(WiFi.softAPIP().toString().c_str());
+                          wrDisp_Status("Setup Wifi");
+                        #endif
+	});
+  
   if (!wifiManager.autoConnect("Bluetti_ESP32")) {
     ESP.restart();
   }
@@ -111,8 +123,19 @@ void initBWifi(bool resetWifi){
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+    // display will have blinking wifi signal until connected.
+    #ifdef DISPLAYSSD1306
+      disp_setPrevStateIcon(0);
+      wifisignal(0);
+      delay(200);
+      Serial.print(".");
+      disp_setPrevStateIcon(1);
+      wifisignal(0);
+    #else
+      delay(500);
+      Serial.print(".");
+    #endif
+
   }
   
   WiFi.setAutoReconnect(true);
@@ -120,7 +143,10 @@ void initBWifi(bool resetWifi){
   Serial.println(F(""));
   Serial.println(F("IP address: "));
   Serial.println(WiFi.localIP());
-
+  #ifdef DISPLAYSSD1306
+    wrDisp_IP(WiFi.localIP().toString().c_str());
+    disp_setWifiSignal(1, WiFi.RSSI());
+  #endif
   if (MDNS.begin(DEVICE_NAME)) {
     Serial.println(F("MDNS responder started"));
   }
@@ -189,6 +215,11 @@ void handleWebserver() {
   }
 
   if ((millis() - lastTimeWebUpdate) > MSG_VIEWER_REFRESH_CYCLE*1000) {
+
+    #ifdef DISPLAYSSD1306
+      // update display
+      disp_setWifiSignal(1,WiFi.RSSI());
+    #endif
 
     // Send Events to the Web Server with current data
     events.send("ping",NULL,millis());
