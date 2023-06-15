@@ -2,8 +2,9 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <display.h>
-#include <config.h>
+#include "config.h"
+#include "display.h"
+
 
 // used for millis loops
 const unsigned long flProgressBar = 200; // speed of update progressbar
