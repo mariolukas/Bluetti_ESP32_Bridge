@@ -27,6 +27,7 @@ static BLEUUID serviceUUID("0000ff00-0000-1000-8000-00805f9b34fb");
 static BLEUUID    WRITE_UUID("0000ff02-0000-1000-8000-00805f9b34fb");
 static BLEUUID    NOTIFY_UUID("0000ff01-0000-1000-8000-00805f9b34fb");
 
+void btResetStack();
 extern void initBluetooth();
 extern void handleBluetooth();
 bool connectToServer();

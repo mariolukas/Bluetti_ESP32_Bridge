@@ -12,12 +12,17 @@ const unsigned long flWifiSignal = 5000; //frequency updating wifi signal streng
 unsigned long prevTimerProgressBar = 0;
 unsigned long prevTimerWifiStarting = 0;
 unsigned long prevTimerBtStarting = 0;
+unsigned long prevTimerDebugger = 0;
+unsigned long prevTimerBtRunning = 0;
 unsigned long prevTimerRuntime = 0;
 unsigned long prevTimerWifiSignal = 0;
+unsigned long prevTimerMQStarting = 0;
+unsigned long prevTimerMQRunning = 0;
 
 // Used variables
 int progress = 0;
 bool btConnected = false;
+bool mqConnected = false;
 byte byteWifiMode;
 int intWifiSignal;
 byte year = 0;
@@ -25,11 +30,11 @@ byte hours = 0;
 byte minutes = 0;
 byte days = 0;
 bool enableProgressbar=false;
-String strdispIP = "254.254.254.254";
-String strdispStatus="NA";
+String strdispIP = "NoConf";
+String strdispStatus="boot..";
 byte prevStateIcons = 0;
 byte prevBTStateIcons = 0;
-
+byte prevMQStateIcon = 0;
 
 
 #define SCREEN_WIDTH 128
@@ -64,7 +69,8 @@ void initDisplay()
     wrDisp_IP();
     wrDisp_Running();
     wrDisp_Status("Init....");
-    btConnected = false;   
+    btConnected = false;  
+    mqConnected = false;   
     byteWifiMode = 0;
 }
 void handleDisplay()
@@ -79,56 +85,112 @@ void handleDisplay()
             prevTimerProgressBar = millis();
         }
     }
-    // update running time every 5 seconds
-    if (millis() - prevTimerRuntime >= 5000)
+    // update running time every 30 seconds
+    if (millis() - prevTimerRuntime >= 30000)
     {
         wrDisp_Running();
         prevTimerRuntime = millis();
     }
+    // debugging
+    #ifdef DEBUGDISP
+        if (millis() - prevTimerDebugger >= 5000)
+        { 
+            prevTimerDebugger = millis();
+            
+                Serial.println("[DISP] BlueTooth status: "+String(btConnected));
+                Serial.println("[DISP] WifiStatus status: "+String(byteWifiMode));
+                Serial.println("[DISP] MQ status: "+String(mqConnected));
+                Serial.println("FreeHeap: "+String(ESP.getFreeHeap()));
+        }
+    #endif
     // blue not connected is blinking
     if (btConnected == false)
     {
         if (millis() - prevTimerBtStarting >= flWifiBTStarting)
         {
+            prevTimerBtStarting = millis();
             if (prevBTStateIcons == 0)
             {
                 // Flash background white
                 prevBTStateIcons = 1;
-                blueToothSignal(btConnected);
+                wrDisp_blueToothSignal(btConnected);
             }
             else
             {
                 // flash background Black
                 prevBTStateIcons = 0;
-                blueToothSignal(btConnected);
+                wrDisp_blueToothSignal(btConnected);
             }
-            prevTimerBtStarting = millis();
         }
+    }
+    else
+    {
+        //static bluetooth 
+        // updata only 1 time per 5 sec
+        if (millis() - prevTimerBtRunning >= 5000)
+        {
+            prevTimerBtRunning = millis();
+            wrDisp_blueToothSignal(btConnected);
+        }
+    }
+    if (mqConnected == false)
+    {
+        if (millis() - prevTimerMQStarting >= flWifiBTStarting)
+        {
+            prevTimerMQStarting = millis();
+            if (prevMQStateIcon == 0)
+            {
+                // Flash background white
+                prevMQStateIcon = 1;
+                wrDisp_mqttConnected(mqConnected);
+            }
+            else
+            {
+                // flash background Black
+                prevMQStateIcon = 0;
+                wrDisp_mqttConnected(mqConnected);
+            }
+            
+        }
+    }
+    else
+    {
+        if (millis() - prevTimerMQRunning >= 5000)
+        {
+            prevTimerMQRunning = millis();
+            wrDisp_mqttConnected(mqConnected);
+        }
+        
     }
     if (byteWifiMode == 0)
     {
         if (millis() - prevTimerWifiStarting >= flWifiBTStarting)
         {
+            prevTimerWifiStarting = millis();
             if (prevStateIcons == 0)
             {
                 // Flash background white
                 prevStateIcons = 1;
-                wifisignal(0);
+                wrDisp_wifisignal(0);
             }
             else
             {
                 // flash background Black
                 prevStateIcons = 0;
-                wifisignal(0);
+                wrDisp_wifisignal(0);
             }
-            prevTimerWifiStarting = millis();
+            
         }
     } else
     {
         if (millis() - prevTimerWifiSignal >= flWifiSignal)
         {
-            wifisignal(byteWifiMode, intWifiSignal); 
             prevTimerWifiSignal = millis();
+            #ifdef DEBUGDISP
+                Serial.println("[DISP] Wifi connected");
+            #endif
+            wrDisp_wifisignal(byteWifiMode, intWifiSignal); 
+            
         }
     }
 
@@ -175,7 +237,34 @@ void wrDisp_Status(String strStatus)
     display.println("Status:" + strStatus);
     display.display();
 }
-void blueToothSignal(bool blConnected)
+void wrDisp_mqttConnected(bool blMqttConnected)
+{
+    display.fillRect(115, 136, 13, 13, 0);
+    display.display();
+
+    if(blMqttConnected)
+    {
+        display.setTextColor(1, 0);
+        display.setCursor(116, 39);
+        display.print("MQ");
+        display.display();
+    }
+    else
+    {
+        if (prevMQStateIcon == 0)
+        {
+            display.fillRect(115, 36, 13, 13, 0);
+            display.setTextColor(1, 0);
+            display.setCursor(116, 39);
+            display.print("MQ");
+        }else
+        {
+            display.fillRect(115, 36, 13, 13, 0);
+        }
+        display.display();
+    }
+}
+void wrDisp_blueToothSignal(bool blConnected)
 {
     display.fillRect(115, 18, 13, 13, 0);
     display.display();
@@ -224,7 +313,11 @@ void blueToothSignal(bool blConnected)
         display.display();
     }
 }
-void wifisignal(int intMode, int intSignal)
+void wrDisp_wifisignal_rewrite_static()
+{
+    wrDisp_wifisignal(byteWifiMode,intWifiSignal);
+}
+void wrDisp_wifisignal(int intMode, int intSignal)
 {
     // intMode:
     // 0, not connected
@@ -254,11 +347,11 @@ void wifisignal(int intMode, int intSignal)
             display.display();
 
         }
-        if ((intSignal > -88) && (intSignal <= -78))
+        if ((intSignal < -85))
         {
             // extreme weak signal 1 bar
             display.writePixel(121, 11, textColor);
-        } else if ((intSignal > -77) && (intSignal <= -67))
+        } else if ((intSignal > -85) && (intSignal <= -67))
         {
             // 2 bars
 
@@ -382,14 +475,12 @@ void wifisignal(int intMode, int intSignal)
         display.print("AP");
         display.display();
     }
-
-
 }
 void disp_setWifiSignal(int extWifMode, int extSignal)
 {
     intWifiSignal = extSignal;
     byteWifiMode = extWifMode;
-    wifisignal(extWifMode,extSignal);
+    wrDisp_wifisignal(extWifMode,extSignal);
 }
 void disp_setWifiMode(byte wMode)
 {
@@ -415,9 +506,17 @@ void disp_setBlueTooth(bool boolBtConn)
 {
     btConnected = boolBtConn;
 }
+void disp_setMqttStatus(bool blMqttconnected)
+{
+    mqConnected = blMqttconnected;
+}
 void disp_setPrevStateIcon(byte bytePrevState)
 {
     prevStateIcons = bytePrevState;
+}
+void disp_setBTPrevStateIcon(byte bytePrevState)
+{
+    prevBTStateIcons = bytePrevState;
 }
 void drawProgressbar(int x,int y, int width,int height, int progress)
 {

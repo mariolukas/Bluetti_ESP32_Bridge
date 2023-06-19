@@ -143,10 +143,11 @@ Config Display:
 Display functionality:
 * Show current assiged IP address (AP mode or normal)
 * Show different wifi connection logo, depending on the mode its in and wifi Strength in normal mode (4 bars)
-* Show the running time of the device in the format "11d12h15m" Currently max until 49 days as this is the time millis() is reset. TODO fix this
-* ability to show status message, currently shows the init and running status. 
+* Show the running time of the device in the format "11d12h15m" Currently max until 49 days as this is the time millis() is reset. 
+* Show status message, currently shows the init and running status, also BLEscan when scanning 
 * a progressbar is available but currently not used anywhere. (to see where it can be used)
-* a bluetooth icon is available, but currently not linked with the bluetooth connection itself.(TODO)
+* Show bluetooth icon status. Connected is static, blinking is trying to connect, together with message in case of scanning.
+* Show MQTT icon status. Connected is static, blinking is trying to connect.
 
 Example display screen:
 ![DisplayImage](doc/images/display.jpg)
