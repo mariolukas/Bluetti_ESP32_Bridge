@@ -132,7 +132,13 @@ States are published to
   * total_battery_percent
 
 ## Display
-By default, display is disabled. To enable uncomment #define DISPLAY 1 in the file Bluetti_ESP32/config.h
+Config Display:
+* By default, display is disabled. 
+* Configurations (customize of file Bluetti_ESP32/config.h): 
+  * Enable display: uncomment #define DISPLAYSSD1306 1
+  * Enable reset of display on init: uncomment DISPLAY_RST_PORT
+    * Known needed for LoRa TTGO v1.0
+  * set SCL & SDA ports: default ports are set to SCL=4 & SDA5, to change update DISPLAY_SCL_PORT and DISPLAY_SDA_PORT 
 
 Display functionality:
 * Show current assiged IP address (AP mode or normal)
@@ -142,6 +148,7 @@ Display functionality:
 * a progressbar is available but currently not used anywhere. (to see where it can be used)
 * a bluetooth icon is available, but currently not linked with the bluetooth connection itself.(TODO)
 
+Example display screen:
 ![DisplayImage](doc/images/display.jpg)
 
 
