@@ -71,7 +71,13 @@ enum field_names {
   ECO_ON,
   ECO_SHUTDOWN,
   CHARGING_MODE,
-  POWER_LIFTING_ON
+  POWER_LIFTING_ON,
+  AC_INPUT_POWER_MAX,
+  AC_INPUT_CURRENT_MAX,
+  AC_OUTPUT_POWER_MAX,
+  AC_OUTPUT_CURRENT_MAX,
+  BATTERY_MIN_PERCENTAGE,   // Discharge lower limit
+  AC_CHARGE_MAX_PERCENTAGE  // Percentage to which point battery will be charged with AC
 
 };
 

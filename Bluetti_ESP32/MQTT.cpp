@@ -184,6 +184,24 @@ String map_field_name(enum field_names f_name){
       case POWER_LIFTING_ON:
         return "power_lifting_on";
         break;
+      case AC_INPUT_POWER_MAX:
+        return "ac_input_power_max";
+        break;
+      case AC_INPUT_CURRENT_MAX:
+        return "ac_input_current_max";
+        break;
+      case AC_OUTPUT_POWER_MAX:
+        return "ac_output_power_max";
+        break;
+      case AC_OUTPUT_CURRENT_MAX:
+        return "ac_output_current_max";
+        break;
+      case BATTERY_MIN_PERCENTAGE:
+        return "battery_min_percentage";
+        break;
+      case AC_CHARGE_MAX_PERCENTAGE:
+        return "ac_charge_max_percentage";
+        break;
       default:
         #ifdef DEBUG
           Serial.println(F("Info 'map_field_name' found unknown field!"));
