@@ -22,4 +22,4 @@ void disp_setWifiSignal(int extWifMode=0, int extSignal=-100);
 void disp_setStatus(String strStatus);
 void disp_setIP(String strIP);
 #endif
-#include <arduino.h>
+#include <Arduino.h>
