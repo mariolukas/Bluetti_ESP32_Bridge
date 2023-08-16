@@ -17,6 +17,7 @@ Join the Discord Server https://discord.gg/fWDSBTCVmB
   * EB3A (tested)
   * EP500 (untested)
   * EP500P (tested)
+  * EP600 (some values still missing)
 * supported BLUETTI functions
   * commands
     * ac output on/off

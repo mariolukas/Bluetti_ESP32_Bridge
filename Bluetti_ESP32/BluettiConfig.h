@@ -17,6 +17,8 @@
  #include "Device_EP500P.h"
 #elif POWER_STATION(AC500)
  #include "Device_AC500.h"
+#elif POWER_STATION(EP600)
+ #include "Device_EP600.h"
 #endif
 
 #endif
