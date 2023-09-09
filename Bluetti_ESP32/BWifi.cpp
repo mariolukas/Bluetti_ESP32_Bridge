@@ -20,6 +20,7 @@ String lastMsg = "";
 
 bool msgViewerDetails = false;
 bool shouldSaveConfig = false;
+int wifiReconnectCounter = 0;
 
 char mqtt_server[40] = "127.0.0.1";
 char mqtt_port[6]  = "1883";
@@ -100,7 +101,7 @@ void initBWifi(bool resetWifi){
                         WiFi.softAPIP().toString().c_str(), 
                         wifiManager->getConfigPortalSSID().c_str());
                         #ifdef DISPLAYSSD1306
-                          wifisignal(2); //AP mode
+                          wrDisp_wifisignal(2); //AP mode
                           wrDisp_IP(WiFi.softAPIP().toString().c_str());
                           wrDisp_Status("Setup Wifi");
                         #endif
@@ -126,11 +127,11 @@ void initBWifi(bool resetWifi){
     // display will have blinking wifi signal until connected.
     #ifdef DISPLAYSSD1306
       disp_setPrevStateIcon(0);
-      wifisignal(0);
+      wrDisp_wifisignal(0);
       delay(200);
       Serial.print(".");
       disp_setPrevStateIcon(1);
-      wifisignal(0);
+      wrDisp_wifisignal(0);
     #else
       delay(500);
       Serial.print(".");
@@ -206,19 +207,36 @@ void initBWifi(bool resetWifi){
 void handleWebserver() {
   
   //Serial.println(F("DEBUG handleWebserver"));
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("WiFi is disconnected, try to reconnect..."));
-    WiFi.disconnect();
-    WiFi.reconnect();
-    AddtoMsgView(String(millis()) + ": WLAN ERROR! try to reconnect");
-    delay(1000);
-  }
-
   if ((millis() - lastTimeWebUpdate) > MSG_VIEWER_REFRESH_CYCLE*1000) {
+    
+    // check wifi status every MSG_VIEWER_REFRESH_CYCLE and set display 
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println(F("WiFi is disconnected, try to reconnect..."));
+      #ifdef DISPLAYSSD1306
+        disp_setWifiMode(0);
+        disp_setStatus("Wifi err..");
+      #endif
+      WiFi.disconnect();
+      WiFi.reconnect();
+      AddtoMsgView(String(millis()) + ": WLAN ERROR! try to reconnect");
+      wifiReconnectCounter++;
+      //delay(1000); no delay as we only check every 5 seconds. Removing 1 second blocking of the program in the loop.
+    } else {
+      #ifdef DISPLAYSSD1306
+        disp_setWifiSignal(1,WiFi.RSSI());
+        if (wifiReconnectCounter > 0)
+        {
+          //only update display ones after wifi is recovered.
+          disp_setStatus("Running!");
+          wifiReconnectCounter = 0;
+        }
+      #endif
+    }
 
     #ifdef DISPLAYSSD1306
       // update display
-      disp_setWifiSignal(1,WiFi.RSSI());
+      disp_setBlueTooth(isBTconnected());
+      disp_setMqttStatus(isMQTTconnected());
     #endif
 
     // Send Events to the Web Server with current data
@@ -236,6 +254,7 @@ void handleWebserver() {
     lastTimeWebUpdate = millis();
   }
 }
+
 
 String processorWebsiteUpdates(const String& var){
   
@@ -296,6 +315,10 @@ String processorWebsiteUpdates(const String& var){
     else{
       return String("...disabled...");
     }
+  }
+  else //return something, else this if then else will crash in case calles without VAR set....
+  {
+    return String("");
   }
 }
 

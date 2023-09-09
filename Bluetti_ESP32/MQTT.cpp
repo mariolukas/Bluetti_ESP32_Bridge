@@ -3,6 +3,8 @@
 #include "BWifi.h"
 #include "BTooth.h"
 #include "utils.h"
+#include "display.h"
+#include "config.h"
 
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -13,6 +15,7 @@ int publishErrorCount = 0;
 unsigned long lastMQTTMessage = 0;
 unsigned long previousDeviceStatePublish = 0;
 unsigned long previousDeviceStateStatusPublish = 0;
+unsigned long previousMqttReconnect = 0;
 
 String map_field_name(enum field_names f_name){
    switch(f_name) {
@@ -316,7 +319,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void subscribeTopic(enum field_names field_name) {
 #ifdef DEBUG
-  Serial.println("subscribe to topic: " +  map_field_name(field_name));
+  Serial.println("[MQTT] subscribe to topic: " +  map_field_name(field_name));
 #endif
   char subscribeTopicBuf[512];
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
@@ -332,27 +335,38 @@ void publishTopic(enum field_names field_name, String value){
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
  
 #ifdef DEBUG
-  Serial.println("publish topic for field: " +  map_field_name(field_name));
+  Serial.println("[MQTT] publish topic for field: " +  map_field_name(field_name));
 #endif
   
   //sometimes we get empty values / wrong vales - all the time device_type is empty
   if (map_field_name(field_name) == "device_type" && value.length() < 3){
 
-    Serial.println(F("Error while publishTopic! 'device_type' can't be empty, reboot device)"));
-    ESP.restart();
+    //Serial.println(F("[MQTT] Error while publishTopic! 'device_type' can't be empty, reboot device)"));
+    //ESP.restart();
+    Serial.println(F("[MQTT] Error while publishTopic! 'device_type' can't be empty, restarting BlueTooth Stack)"));
+    btResetStack();
    
   } 
   
   sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, map_field_name(field_name).c_str() ); 
   if (strlen(settings.mqtt_server) == 0){
     AddtoMsgView(String(millis()) +": " + map_field_name(field_name) + " -> " + value); 
+    #ifdef DEBUG
+      Serial.println("[MQTT] No MQTT server specified!");
+    #endif
   }else{
     lastMQTTMessage = millis();
     if (!client.publish(publishTopicBuf, value.c_str() )){
       publishErrorCount++;
+      #ifdef DEBUG
+        Serial.println("[MQTT] Publish error: " + String(lastMQTTMessage) + ": publish ERROR! " + map_field_name(field_name) + " -> " + value);
+      #endif
       AddtoMsgView(String(lastMQTTMessage) + ": publish ERROR! " + map_field_name(field_name) + " -> " + value);
     }
     else{
+      #ifdef DEBUG
+        Serial.println("[MQTT] Last Message: " + String(lastMQTTMessage) + ": " + map_field_name(field_name) + " -> " + value);
+      #endif
       AddtoMsgView(String(lastMQTTMessage) + ": " + map_field_name(field_name) + " -> " + value);
     }
   }
@@ -366,6 +380,9 @@ void publishDeviceState(){
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
   sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, "device" ); 
   String value = "{\"IP\":\"" + WiFi.localIP().toString() + "\", \"MAC\":\"" + WiFi.macAddress() + "\", \"Uptime\":" + millis() + "}";
+  #ifdef DEBUG
+    Serial.println("[MQTT] PublishingDeviceState: "+value);
+  #endif
   if (!client.publish(publishTopicBuf, value.c_str() )){
     publishErrorCount++;
   }
@@ -380,6 +397,9 @@ void publishDeviceStateStatus(){
   ESPBluettiSettings settings = get_esp32_bluetti_settings();
   sprintf(publishTopicBuf, "bluetti/%s/state/%s", settings.bluetti_device_id, "device_status" ); 
   String value = "{\"MQTTconnected\":" + String(isMQTTconnected()) + ", \"BTconnected\":" + String(isBTconnected()) + "}"; 
+  #ifdef DEBUG
+    Serial.println("[MQTT] PublishingDeviceStateStatus: "+value);
+  #endif
   if (!client.publish(publishTopicBuf, value.c_str() )){
     publishErrorCount++;
   }
@@ -392,11 +412,12 @@ void initMQTT(){
 
     enum field_names f_name;
     ESPBluettiSettings settings = get_esp32_bluetti_settings();
+    Serial.println("[MQTT] init MQTT");
     if (strlen(settings.mqtt_server) == 0){
-      Serial.println("No MQTT server configured");
+      Serial.println("[MQTT] No MQTT server configured");
       return;
     }
-    Serial.print("Connecting to MQTT at: ");
+    Serial.print("[MQTT] Connecting to MQTT at: ");
     Serial.print(settings.mqtt_server);
     Serial.print(":");
     Serial.println(F(settings.mqtt_port));
@@ -414,7 +435,7 @@ void initMQTT(){
     
     if (connect_result) {
         
-      Serial.println(F("Connected to MQTT Server... "));
+      Serial.println(F("[MQTT] Connected to MQTT Server... "));
 
       // subscribe to topics for commands
       for (int i=0; i< sizeof(bluetti_device_command)/sizeof(device_field_data_t); i++){
@@ -446,15 +467,21 @@ void handleMQTT(){
       publishDeviceStateStatus();
     }
     if (!isMQTTconnected() && publishErrorCount > 5){
-      Serial.println(F("MQTT lost connection, try to reconnect"));
-      client.disconnect();
-      lastMQTTMessage=0;
-      previousDeviceStatePublish=0;
-      previousDeviceStateStatusPublish=0;
-      publishErrorCount=0;
-      AddtoMsgView(String(millis()) + ": MQTT connection lost, try reconnect");
-      initMQTT();
-
+      if ((millis() - previousMqttReconnect) > 5000)
+      {
+        previousMqttReconnect = millis();
+        Serial.println(F("[MQTT] lost connection, try to reconnect"));
+        #ifdef DISPLAYSSD1306
+            disp_setMqttStatus(false);
+        #endif
+        client.disconnect();
+        lastMQTTMessage=0;
+        previousDeviceStatePublish=0;
+        previousDeviceStateStatusPublish=0;
+        publishErrorCount=0;
+        AddtoMsgView(String(millis()) + ": MQTT connection lost, try reconnect");
+        initMQTT();
+      }
     }
     
     client.loop();
