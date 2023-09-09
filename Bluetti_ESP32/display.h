@@ -26,4 +26,4 @@ void disp_setStatus(String strStatus);
 void disp_setIP(String strIP);
 void disp_setMqttStatus(bool blMqttconnected=false);
 #endif
-#include <arduino.h>
+#include <Arduino.h>
