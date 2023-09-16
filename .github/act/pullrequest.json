@@ -1,0 +1,12 @@
+{
+  "action": "opened",
+  "number": 1,
+  "pull_request": {
+    "base": {
+      "ref": "main"
+    },
+    "head": {
+      "ref": "feature-branch"
+    }
+  }
+}

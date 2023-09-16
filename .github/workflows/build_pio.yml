@@ -1,0 +1,43 @@
+name: Build Bluetti ESP32 Bridge with PlatformIO
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+  workflow_run:
+    workflows: ["Build with PlatformIO on PR Request"]
+    types:
+      - completed
+    branches:
+      - main  # Change this to the branch you want to trigger the build on
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Set the desired Python version
+
+    - name: Install PlatformIO
+      run: |
+        pip install -U platformio
+        platformio platform install espressif32
+
+    - name: Build ESP32 Program
+      run: |
+        platformio run
+
+#    - name: Upload artifacts
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: firmware  # Set the name of the artifact directory
+#        path: .pio/build/<environment_name>  # Replace <environment_name> with your PlatformIO environment name

@@ -1,0 +1,54 @@
+name: Build Bluetti ESP32 Bridge with Arduino IDE
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+  workflow_run:
+    workflows: ["Build with Arduino on PR Request"]
+    types:
+      - completed
+    branches:
+      - main  # Change this to the branch you want to trigger the build on
+      -
+jobs:
+  build-firmware:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: 🏗 Install build dependencies
+        run: sudo apt-get -qq update && sudo apt-get -y install build-essential curl python3-serial
+
+      - name: ⬇ Checkout code
+        uses: actions/checkout@v2
+        with:
+         fetch-depth: 0
+
+
+      - name: Install Arduino CLI
+        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
+
+      - name: Install platform
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+
+      - name: Install Platform
+        run: |
+          arduino-cli lib install WiFiManager
+          arduino-cli lib install PubSubClient
+          export ARDUINO_LIBRARY_ENABLE_UNSAFE_INSTALL=true && arduino-cli lib install --git-url https://github.com/me-no-dev/AsyncTCP.git
+          export ARDUINO_LIBRARY_ENABLE_UNSAFE_INSTALL=true && arduino-cli lib install --git-url https://github.com/me-no-dev/ESPAsyncWebServer.git
+          export ARDUINO_LIBRARY_ENABLE_UNSAFE_INSTALL=true && arduino-cli lib install --git-url https://github.com/h2zero/NimBLE-Arduino.git
+          arduino-cli lib install AsyncElegantOTA
+          arduino-cli lib install "Adafruit SSD1306"
+          arduino-cli lib install "Adafruit GFX Library"
+          arduino-cli lib install "Adafruit BusIO"
+
+      - name: 🔨 Build Firmware
+        run: |
+            cd Bluetti_ESP32
+            arduino-cli compile --fqbn esp32:esp32:esp32 Bluetti_ESP32.ino
