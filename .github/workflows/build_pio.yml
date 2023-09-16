@@ -16,6 +16,7 @@ on:
 
 jobs:
   build:
+    name: build with plattformIO
     runs-on: ubuntu-latest
 
     steps:

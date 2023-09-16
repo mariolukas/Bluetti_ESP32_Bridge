@@ -14,7 +14,8 @@ on:
       - main  # Change this to the branch you want to trigger the build on
       -
 jobs:
-  build-firmware:
+  build:
+    name: build with Arduino CLI
     runs-on: ubuntu-latest
 
     steps:
