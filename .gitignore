@@ -46,3 +46,4 @@ build
 .Trashes
 ehthumbs.db
 Thumbs.db
+Bluetti_ESP32/config.h

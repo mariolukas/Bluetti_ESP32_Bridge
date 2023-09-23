@@ -10,6 +10,7 @@
 #define DISPLAY_SDA_PORT 5
 //Uncomment to toggle display reset on start, required for displays like LoRa TTGO v1.0
 //#define DISPLAY_RST_PORT 16
+  
 
 #define EEPROM_SALT 13374
 
@@ -17,9 +18,6 @@
 #define BLUETTI_TYPE AC300
 
 #define BLUETOOTH_QUERY_MESSAGE_DELAY 3000
-#define BLUETOOTH_MAX_RETRIES_BEFORE_REBOOT 10
-#define BLUETOOTH_SCAN_DURATION_IN_SECONDS 10
-#define BLUETOOTH_SCAN_INTERVAL_IN_SECONDS 10
 
 #define RELAISMODE 1
 #define RELAIS_PIN 22

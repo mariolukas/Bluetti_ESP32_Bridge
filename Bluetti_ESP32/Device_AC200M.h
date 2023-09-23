@@ -89,7 +89,6 @@ static device_field_data_t bluetti_polling_command[] = {
   // Status
   // changed to only one page 0 request (a portion of 7F bytes)
   {FIELD_UNDEFINED,           0x00, 0x0A, 0x7F, 0, 0, TYPE_UNDEFINED},
-
   // Settings  
   {FIELD_UNDEFINED,           0x0B, 0xB9, 0x3F, 0, 0, TYPE_UNDEFINED}
 };

@@ -342,9 +342,9 @@ void publishTopic(enum field_names field_name, String value){
   if (map_field_name(field_name) == "device_type" && value.length() < 3){
 
     //Serial.println(F("[MQTT] Error while publishTopic! 'device_type' can't be empty, reboot device)"));
-    //ESP.restart();
+    ESP.restart();
     Serial.println(F("[MQTT] Error while publishTopic! 'device_type' can't be empty, restarting BlueTooth Stack)"));
-    btResetStack();
+   // btResetStack();
    
   } 
   

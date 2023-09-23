@@ -3,16 +3,10 @@
 #include "utils.h"
 #include "PayloadParser.h"
 #include "BWifi.h"
-#include "config.h"
 #include "display.h"
-#include "MQTT.h"
 
 
 int pollTick = 0;
-BLEScan* pBLEScan;
-unsigned long prevTimerBTScan = 0;
-int counter = 0;
-int blenulptrCounter = 0;
 
 struct command_handle {
   uint8_t page;
@@ -24,7 +18,6 @@ QueueHandle_t commandHandleQueue;
 QueueHandle_t sendQueue;
 
 unsigned long lastBTMessage = 0;
-unsigned long lastBTConnectToServer = 0;
 
 class MyClientCallback : public BLEClientCallbacks {
   void onConnect(BLEClient* pclient) {
@@ -73,12 +66,12 @@ class BluettiAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void initBluetooth(){
   BLEDevice::init("");
-  pBLEScan = BLEDevice::getScan();
-  //pBLEScan->setAdvertisedDeviceCallbacks(new BluettiAdvertisedDeviceCallbacks());
-  //pBLEScan->setInterval(1349);
-  //pBLEScan->setWindow(449);
-  //pBLEScan->setActiveScan(true);
-  //pBLEScan->start(5, false);
+  BLEScan* pBLEScan = BLEDevice::getScan();
+  pBLEScan->setAdvertisedDeviceCallbacks(new BluettiAdvertisedDeviceCallbacks());
+  pBLEScan->setInterval(1349);
+  pBLEScan->setWindow(449);
+  pBLEScan->setActiveScan(true);
+  pBLEScan->start(5, false);
   
   commandHandleQueue = xQueueCreate( 5, sizeof(bt_command_t ) );
   sendQueue = xQueueCreate( 5, sizeof(bt_command_t) );
@@ -137,13 +130,6 @@ bool connectToServer() {
       Serial.print(F("[BT] Failed to find our service UUID: "));
       Serial.println(serviceUUID.toString().c_str());
       pClient->disconnect();
-      pClient->deleteServices();
-      // for fixing UUID service nullptr, check 5 times, if no luck reboot.
-      blenulptrCounter++;
-      if (blenulptrCounter > 5)
-      {
-        ESP.restart();
-      }
       return false;
     }
     Serial.println(F("[BT] - Found our service"));
@@ -155,8 +141,6 @@ bool connectToServer() {
       Serial.print(F("[BT] Failed to find our characteristic UUID: "));
       Serial.println(WRITE_UUID.toString().c_str());
       pClient->disconnect();
-      pClient->deleteServices();
-      ESP.restart();
       return false;
     }
     Serial.println(F("[BT] - Found our Write characteristic"));
@@ -167,7 +151,6 @@ bool connectToServer() {
       Serial.print(F("[BT] Failed to find our characteristic UUID: "));
       Serial.println(NOTIFY_UUID.toString().c_str());
       pClient->disconnect();
-      pClient->deleteServices();
       return false;
     }
     Serial.println(F("[BT] - Found our Write characteristic"));
@@ -220,21 +203,14 @@ void sendBTCommand(bt_command_t command){
 }
 
 void handleBluetooth(){
-  if (doConnect == true)
-  {
-    if ((millis() - lastBTConnectToServer) > BLUETOOTH_QUERY_MESSAGE_DELAY)
-    {
-      lastBTConnectToServer = millis();
-      if (connectToServer())
-      {
-          Serial.println(F("[BT] We are now connected to the Bluetti BLE Server."));
-      }
-      else
-      {
-          Serial.println(F("[BT] We have failed to connect to the server; there is nothing more we will do."));
-          doConnect = false;
-      }
+
+  if (doConnect == true) {
+    if (connectToServer()) {
+      Serial.println(F("We are now connected to the Bluetti BLE Server."));
+    } else {
+      Serial.println(F("We have failed to connect to the server; there is nothing more we will do."));
     }
+    doConnect = false;
   }
 
   if ((millis() - lastBTMessage) > (MAX_DISCONNECTED_TIME_UNTIL_REBOOT * 60000)){ 
@@ -273,40 +249,8 @@ void handleBluetooth(){
 
     handleBTCommandQueue();
     
-  }else {
-    // check every 10 seconds only.
-    if (millis() - prevTimerBTScan >= 10000)
-    {
-      prevTimerBTScan = millis();
-      counter++;
-      if (pBLEScan->isScanning() == false)
-      {
-        BLEDevice::deinit(true);
-        BLEDevice::init("");
-        pBLEScan = BLEDevice::getScan();
-        pBLEScan->setAdvertisedDeviceCallbacks(new BluettiAdvertisedDeviceCallbacks());
-        pBLEScan->setActiveScan(true);
-        pBLEScan->setInterval(1349);
-        pBLEScan->setWindow(449);
-        #ifdef DISPLAYSSD1306
-           // making sure, display has proper values during loop lock
-           disp_setBTPrevStateIcon(0);
-           wrDisp_blueToothSignal(false);
-        #endif
-
-        //this scan locks the loop for 10 second, meaning all blinking leds and screen updates are not happening.
-        //the bluetooth icon will not blink correctly every 10 seconds for 5 seconds when a scan is happenig and is not connected
-        #ifdef DISPLAYSSD1306
-           // update status to BleScan
-           wrDisp_Status("BLEScan..");
-        #endif
-        pBLEScan->start(5, false);
-        #ifdef DISPLAYSSD1306
-          // update status to BleScan
-          wrDisp_Status("Running!");
-        #endif 
-      }
-    }
+  }else if(doScan){
+    BLEDevice::getScan()->start(0);
   }
 }
 
