@@ -36,6 +36,11 @@ Join the Discord Server https://discord.gg/fWDSBTCVmB
 
 ## Getting Started
 
+### Configuration
+
+Create a copy of config.sample.h and name it config.h
+Change at least the device type to fit your Bluetti device.
+
 ### Compiling and Flashing to ESP32
 
 #### Arduino IDE
