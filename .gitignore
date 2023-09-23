@@ -37,7 +37,7 @@ build
 
 # Other files and folders
 .vscode/
-
+.idea/
 # OS generated files
 .DS_Store
 .DS_Store?
