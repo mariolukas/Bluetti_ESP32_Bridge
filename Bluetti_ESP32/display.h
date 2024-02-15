@@ -24,6 +24,9 @@ void disp_setBlueTooth(bool boolBtConn=false);
 void disp_setWifiSignal(int extWifMode=0, int extSignal=-100);
 void disp_setStatus(String strStatus);
 void disp_setIP(String strIP);
+void disp_setBattery(String battery);
+void disp_setWattIn(String watt);
+void disp_setWattOut(String watt);
 void disp_setMqttStatus(bool blMqttconnected=false);
 #endif
 #include <Arduino.h>

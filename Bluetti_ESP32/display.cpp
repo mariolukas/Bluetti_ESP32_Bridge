@@ -32,6 +32,9 @@ byte days = 0;
 bool enableProgressbar=false;
 String strdispIP = "NoConf";
 String strdispStatus="boot..";
+String strBattery = "";
+String strWattIn = "";
+String strWattOut = "";
 byte prevStateIcons = 0;
 byte prevBTStateIcons = 0;
 byte prevMQStateIcon = 0;
@@ -39,7 +42,10 @@ byte prevMQStateIcon = 0;
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3C for 128x64, 0x3D for 128x32
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 void initDisplay()
 {
@@ -53,19 +59,20 @@ void initDisplay()
         digitalWrite(DISPLAY_RST_PORT, HIGH);
         delay(20);
     #endif
-    Wire.begin(DISPLAY_SDA_PORT, DISPLAY_SCL_PORT);
-    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C, false, false))
+    // Wire.begin(DISPLAY_SDA_PORT, DISPLAY_SCL_PORT); // Cause issue on a few display
+    if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
     {
         Serial.println(F("display: SSD1306 allocation failed"));
-        for (;;)
-            ;
+        for (;;);
+    } else {
+      Serial.println(F("display: SSD1306 initialised correctly!"));
     }
     display.clearDisplay();
     display.setTextSize(1); // Draw 2X-scale text
     display.setTextColor(BLACK,WHITE);
     display.setCursor(1, 1);
     display.drawRect(0,0,73,10,WHITE);
-    display.println("BlueTTI Wifi");
+    display.println("BLUETTI Wifi");
     wrDisp_IP();
     wrDisp_Running();
     wrDisp_Status("Init....");
@@ -235,6 +242,33 @@ void wrDisp_Status(String strStatus)
     display.setTextColor(WHITE,BLACK);
     display.setCursor(0, 30);
     display.println("Status:" + strStatus);
+    display.display();
+}
+void wrDisp_Battery(String percent)
+{
+    display.fillRect(0,45,50,20,0);
+    display.setTextColor(WHITE,BLACK);
+    display.setCursor(0, 45);
+    display.setTextSize(2);
+    display.println(percent + "%");
+    display.display();
+    display.setTextSize(1);
+}
+void wrDisp_WattIn(String watt)
+{
+    display.fillRect(50,45,60,8,0);
+    display.setTextColor(WHITE,BLACK);
+    display.setCursor(50, 45);
+    display.println("IN:  " + watt + "W");
+    display.display();
+}
+void wrDisp_WattOut(String watt)
+{
+    display.fillRect(50,53,60,8,0);
+    display.fillRect(110, 48, 18, 8, 0); // Remove glitch under MQ
+    display.setTextColor(WHITE,BLACK);
+    display.setCursor(50, 53);
+    display.println("OUT: " + watt + "W");
     display.display();
 }
 void wrDisp_mqttConnected(bool blMqttConnected)
@@ -492,6 +526,30 @@ void disp_setIP(String strIP)
     {
         wrDisp_Status(strIP);
         strdispIP = strIP;
+    }
+}
+void disp_setBattery(String battery)
+{
+    if (battery != strBattery)
+    {
+        wrDisp_Battery(battery);
+        strBattery = battery;
+    }
+}
+void disp_setWattIn(String watt)
+{
+    if (watt != strWattIn)
+    {
+        wrDisp_WattIn(watt);
+        strWattIn = watt;
+    }
+}
+void disp_setWattOut(String watt)
+{
+    if (watt != strWattOut)
+    {
+        wrDisp_WattOut(watt);
+        strWattOut = watt;
     }
 }
 void disp_setStatus(String strStatus)

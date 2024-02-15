@@ -154,6 +154,7 @@ Display functionality:
 * a progressbar is available but currently not used anywhere. (to see where it can be used)
 * Show bluetooth icon status. Connected is static, blinking is trying to connect, together with message in case of scanning.
 * Show MQTT icon status. Connected is static, blinking is trying to connect.
+* Show battery percentage, watts In and Out
 
 Example display screen:
 ![DisplayImage](doc/images/display.jpg)
