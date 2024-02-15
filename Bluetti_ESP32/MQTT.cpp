@@ -371,6 +371,13 @@ void publishTopic(enum field_names field_name, String value){
     }
   }
   
+  if (map_field_name(field_name) == "total_battery_percent") {
+    disp_setBattery(value);
+  } else if (map_field_name(field_name) == "dc_input_power") {
+    disp_setWattIn(value);
+  } else if (map_field_name(field_name) == "ac_output_power") {
+    disp_setWattOut(value);
+  }
  
 }
 
