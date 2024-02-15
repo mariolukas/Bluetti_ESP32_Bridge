@@ -265,7 +265,7 @@ void wrDisp_WattIn(String watt)
 void wrDisp_WattOut(String watt)
 {
     display.fillRect(50,53,60,8,0);
-    display.fillRect(110, 48, 18, 8, 0); // Remove glitch under MQ
+    display.fillRect(110, 47, 18, 10, 0); // Remove glitch under MQ
     display.setTextColor(WHITE,BLACK);
     display.setCursor(50, 53);
     display.println("OUT: " + watt + "W");
