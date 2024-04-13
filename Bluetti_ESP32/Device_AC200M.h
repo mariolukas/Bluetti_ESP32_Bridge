@@ -13,8 +13,6 @@ enum auto_sleep_mode {
 
 // { FIELD_NAME, PAGE, OFFSET, SIZE, SCALE (if scale is needed e.g. decimal value, defaults to 0) , ENUM (if data is enum, defaults to 0) , FIELD_TYPE }
 static device_field_data_t bluetti_device_state[] = {
-
-
   /*Page 0x00 Core */
   {DEVICE_TYPE,               0x00, 0x0A, 7, 0, 0, STRING_FIELD},
   {SERIAL_NUMBER,             0x00, 0x11, 4, 0 ,0, SN_FIELD},
@@ -62,7 +60,7 @@ static device_field_data_t bluetti_device_state[] = {
 
   //Page 0x0B Controls 
   // Time after the display switches off -> READ
-  {AUTO_SLEEP_MODE,           0x0B, 0xF5, 1, 0, 0, UINT_FIELD},
+  {AUTO_SLEEP_MODE,           0x0B, 0xF5, 1, 0, 0, UINT_FIELD}
 
 };
 
@@ -71,8 +69,8 @@ static device_field_data_t bluetti_device_state[] = {
 // This can be done with MqttExplorer for instance
 static device_field_data_t bluetti_device_command[] = {
   /*Page 0x0B Core */
-  {DC_OUTPUT_ON,              0x0B, 0xC0, 1, 0, 0, BOOL_FIELD},
   {AC_OUTPUT_ON,              0x0B, 0xBF, 1, 0, 0, BOOL_FIELD},
+  {DC_OUTPUT_ON,              0x0B, 0xC0, 1, 0, 0, BOOL_FIELD},
 
   // Time after the display switches off -> WRITE
   // Caution: there is no check on the device, if the value is within the list of alowed values.
@@ -81,16 +79,22 @@ static device_field_data_t bluetti_device_command[] = {
   // But by writing an allowed value it turns back to normality.
   // I guess this is true for all "enum type" settings
   {AUTO_SLEEP_MODE,           0x0B, 0xF5, 1, 0, 0, UINT_FIELD},
-  {POWER_OFF,                 0x0B, 0xF4, 1, 0, 0, BOOL_FIELD},
+  {POWER_OFF,                 0x0B, 0xF4, 1, 0, 0, BOOL_FIELD}
   
 };
 
 static device_field_data_t bluetti_polling_command[] = {
   // Status
   // changed to only one page 0 request (a portion of 7F bytes)
-  {FIELD_UNDEFINED,           0x00, 0x0A, 0x7F, 0, 0, TYPE_UNDEFINED},
-  // Settings  
-  {FIELD_UNDEFINED,           0x0B, 0xB9, 0x3F, 0, 0, TYPE_UNDEFINED}
+  {FIELD_UNDEFINED, 0x00, 0x24, 0x32 ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x47, 0x4A ,0 , 0, TYPE_UNDEFINED},
+  {FIELD_UNDEFINED, 0x00, 0x5c, 0x79 ,0 , 0, TYPE_UNDEFINED},
+
+  {FIELD_UNDEFINED, 0x00, 0x30, 0x32 ,0 , 0, TYPE_UNDEFINED},
+  // {FIELD_UNDEFINED, 0x0B, 0xF5, 0x07 ,0 , 0, TYPE_UNDEFINED},
+  //Pack Polling
+  {FIELD_UNDEFINED, 0x00, 0x5B, 0x25 ,0 , 0, TYPE_UNDEFINED}
+  // {FIELD_UNDEFINED, 0x00, 0xBB9, 0x3D ,0 , 0, TYPE_UNDEFINED}
 };
 
 #endif
