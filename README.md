@@ -49,7 +49,7 @@ You will need to install a board support package for your ESP32. Additionally th
 
 * https://github.com/tzapu/WiFiManager
 * https://github.com/knolleary/pubsubclient
-* https://github.com/ayushsharma82/AsyncElegantOTA
+* https://github.com/ayushsharma82/ElegantOTA
 * https://github.com/me-no-dev/ESPAsyncWebServer
 * https://github.com/me-no-dev/AsyncTCP/archive
 

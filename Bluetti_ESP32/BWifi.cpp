@@ -8,7 +8,7 @@
 #include <ESPAsyncWebServer.h> // https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
 #include <AsyncTCP.h> // https://github.com/me-no-dev/AsyncTCP/archive/master.zip
 #include <ESPmDNS.h>
-#include <AsyncElegantOTA.h> // https://github.com/ayushsharma82/AsyncElegantOTA/archive/master.zip
+#include <ElegantOTA.h> // https://github.com/ayushsharma82/ElegantOTA/archive/master.zip
 #include "display.h"
 
 AsyncWebServer server(80);
@@ -194,9 +194,9 @@ void initBWifi(bool resetWifi){
   server.addHandler(&events);
 
   if (!wifiConfig.ota_username) {
-    AsyncElegantOTA.begin(&server);
+    ElegantOTA.begin(&server);
   } else {
-    AsyncElegantOTA.begin(&server, wifiConfig.ota_username, wifiConfig.ota_password);
+    ElegantOTA.begin(&server, wifiConfig.ota_username, wifiConfig.ota_password);
   }
 
   server.begin();
